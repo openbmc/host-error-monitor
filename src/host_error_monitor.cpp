@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+#include <systemd/sd-journal.h>
+
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <gpiod.hpp>
 #include <iostream>
@@ -35,6 +37,12 @@ static boost::asio::steady_timer caterrAssertTimer(io);
 // GPIO Lines and Event Descriptors
 static gpiod::line caterrLine;
 static boost::asio::posix::stream_descriptor caterrEvent(io);
+//----------------------------------
+// PCH_BMC_THERMTRIP function related definition
+//----------------------------------
+// GPIO Lines and Event Descriptors
+static gpiod::line pchThermtripLine;
+static boost::asio::posix::stream_descriptor pchThermtripEvent(io);
 
 static void initializeHostState()
 {
@@ -274,6 +282,36 @@ static void caterrHandler()
                                caterrHandler();
                            });
 }
+static void pchThermtripHandler()
+{
+    if (!hostOff)
+    {
+        gpiod::line_event gpioLineEvent = pchThermtripLine.event_read();
+
+        bool pchThermtrip =
+            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+        if (pchThermtrip)
+        {
+            std::cout << "PCH Thermal trip detected \n";
+            // log to redfish, call API
+            sd_journal_send("MESSAGE=SsbThermalTrip: SSB Thermal trip",
+                            "PRIORITY=%i", LOG_INFO, "REDFISH_MESSAGE_ID=%s",
+                            "OpenBMC.0.1.SsbThermalTrip", NULL);
+        }
+    }
+    pchThermtripEvent.async_wait(
+        boost::asio::posix::stream_descriptor::wait_read,
+        [](const boost::system::error_code ec) {
+            if (ec)
+            {
+                std::cerr << "PCH Thermal trip handler error: " << ec.message()
+                          << "\n";
+                return;
+            }
+            pchThermtripHandler();
+        });
+}
+
 } // namespace host_error_monitor
 
 int main(int argc, char* argv[])
@@ -299,6 +337,15 @@ int main(int argc, char* argv[])
     if (!host_error_monitor::requestGPIOEvents(
             "CPU_CATERR", host_error_monitor::caterrHandler,
             host_error_monitor::caterrLine, host_error_monitor::caterrEvent))
+    {
+        return -1;
+    }
+
+    // Request PCH_BMC_THERMTRIP GPIO events
+    if (!host_error_monitor::requestGPIOEvents(
+            "PCH_BMC_THERMTRIP", host_error_monitor::pchThermtripHandler,
+            host_error_monitor::pchThermtripLine,
+            host_error_monitor::pchThermtripEvent))
     {
         return -1;
     }
