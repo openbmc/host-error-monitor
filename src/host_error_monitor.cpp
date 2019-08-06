@@ -51,6 +51,31 @@ static boost::asio::posix::stream_descriptor err2Event(io);
 static gpiod::line pchThermtripLine;
 static boost::asio::posix::stream_descriptor pchThermtripEvent(io);
 
+static void cpuIERRLog()
+{
+    sd_journal_send("MESSAGE=HostError: IERR", "PRIORITY=%i", LOG_INFO,
+                    "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
+                    "REDFISH_MESSAGE_ARGS=%s", "IERR", NULL);
+}
+
+static void cpuIERRLog(const int cpuNum)
+{
+    std::string msg = "IERR on CPU " + std::to_string(cpuNum + 1);
+
+    sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
+                    LOG_INFO, "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
+                    "REDFISH_MESSAGE_ARGS=%s", msg.c_str(), NULL);
+}
+
+static void cpuIERRLog(const int cpuNum, const std::string& type)
+{
+    std::string msg = type + " IERR on CPU " + std::to_string(cpuNum + 1);
+
+    sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
+                    LOG_INFO, "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
+                    "REDFISH_MESSAGE_ARGS=%s", msg.c_str(), NULL);
+}
+
 static void cpuERR2Log()
 {
     sd_journal_send("MESSAGE=HostError: ERR2 Timeout", "PRIORITY=%i", LOG_INFO,
@@ -245,9 +270,208 @@ static void startCrashdumpAndRecovery(bool recoverSystem)
         "com.intel.crashdump.Stored", "GenerateStoredLog");
 }
 
+static bool checkIERRCPUs()
+{
+    bool cpuIERRFound = false;
+    for (int cpu = 0, addr = MIN_CLIENT_ADDR; addr <= MAX_CLIENT_ADDR;
+         cpu++, addr++)
+    {
+        uint8_t cc = 0;
+        CPUModel model{};
+        uint8_t stepping = 0;
+        if (peci_GetCPUID(addr, &model, &stepping, &cc) != PECI_CC_SUCCESS)
+        {
+            std::cerr << "Cannot get CPUID!\n";
+            continue;
+        }
+
+        switch (model)
+        {
+            case skx:
+            {
+                // First check the MCA_ERR_SRC_LOG to see if this is the CPU
+                // that caused the IERR
+                uint32_t mcaErrSrcLog = 0;
+                if (peci_RdPkgConfig(addr, 0, 5, 4, (uint8_t*)&mcaErrSrcLog,
+                                     &cc) != PECI_CC_SUCCESS)
+                {
+                    continue;
+                }
+                // Check MSMI_INTERNAL (20) and IERR_INTERNAL (27)
+                if ((mcaErrSrcLog & (1 << 20)) || (mcaErrSrcLog & (1 << 27)))
+                {
+                    // TODO: Light the CPU fault LED?
+                    cpuIERRFound = true;
+                    // Next check if it's a CPU/VR mismatch by reading the
+                    // IA32_MC4_STATUS MSR (0x411)
+                    uint64_t mc4Status = 0;
+                    if (peci_RdIAMSR(addr, 0, 0x411, &mc4Status, &cc) !=
+                        PECI_CC_SUCCESS)
+                    {
+                        continue;
+                    }
+                    // Check MSEC bits 31:24 for
+                    // MCA_SVID_VCCIN_VR_ICC_MAX_FAILURE (0x40),
+                    // MCA_SVID_VCCIN_VR_VOUT_FAILURE (0x42), or
+                    // MCA_SVID_CPU_VR_CAPABILITY_ERROR (0x43)
+                    if ((mc4Status & (0x40 << 24)) ||
+                        (mc4Status & (0x42 << 24)) ||
+                        (mc4Status & (0x43 << 24)))
+                    {
+                        cpuIERRLog(cpu, "CPU/VR Mismatch");
+                        continue;
+                    }
+
+                    // Next check if it's a Core FIVR fault by looking for a
+                    // non-zero value of CORE_FIVR_ERR_LOG (B(1) D30 F2 offset
+                    // 80h)
+                    uint32_t coreFIVRErrLog = 0;
+                    if (peci_RdPCIConfigLocal(
+                            addr, 1, 30, 2, 0x80, sizeof(uint32_t),
+                            (uint8_t*)&coreFIVRErrLog, &cc) != PECI_CC_SUCCESS)
+                    {
+                        continue;
+                    }
+                    if (coreFIVRErrLog)
+                    {
+                        cpuIERRLog(cpu, "Core FIVR Fault");
+                        continue;
+                    }
+
+                    // Next check if it's an Uncore FIVR fault by looking for a
+                    // non-zero value of UNCORE_FIVR_ERR_LOG (B(1) D30 F2 offset
+                    // 84h)
+                    uint32_t uncoreFIVRErrLog = 0;
+                    if (peci_RdPCIConfigLocal(addr, 1, 30, 2, 0x84,
+                                              sizeof(uint32_t),
+                                              (uint8_t*)&uncoreFIVRErrLog,
+                                              &cc) != PECI_CC_SUCCESS)
+                    {
+                        continue;
+                    }
+                    if (uncoreFIVRErrLog)
+                    {
+                        cpuIERRLog(cpu, "Uncore FIVR Fault");
+                        continue;
+                    }
+
+                    // Last if CORE_FIVR_ERR_LOG and UNCORE_FIVR_ERR_LOG are
+                    // both zero, but MSEC bits 31:24 have either
+                    // MCA_FIVR_CATAS_OVERVOL_FAULT (0x51) or
+                    // MCA_FIVR_CATAS_OVERCUR_FAULT (0x52), then log it as an
+                    // uncore FIVR fault
+                    if (!coreFIVRErrLog && !uncoreFIVRErrLog &&
+                        ((mc4Status & (0x51 << 24)) ||
+                         (mc4Status & (0x52 << 24))))
+                    {
+                        cpuIERRLog(cpu, "Uncore FIVR Fault");
+                        continue;
+                    }
+                    cpuIERRLog(cpu);
+                }
+                break;
+            }
+            case icx:
+            {
+                // First check the MCA_ERR_SRC_LOG to see if this is the CPU
+                // that caused the IERR
+                uint32_t mcaErrSrcLog = 0;
+                if (peci_RdPkgConfig(addr, 0, 5, 4, (uint8_t*)&mcaErrSrcLog,
+                                     &cc) != PECI_CC_SUCCESS)
+                {
+                    continue;
+                }
+                // Check MSMI_INTERNAL (20) and IERR_INTERNAL (27)
+                if ((mcaErrSrcLog & (1 << 20)) || (mcaErrSrcLog & (1 << 27)))
+                {
+                    // TODO: Light the CPU fault LED?
+                    cpuIERRFound = true;
+                    // Next check if it's a CPU/VR mismatch by reading the
+                    // IA32_MC4_STATUS MSR (0x411)
+                    uint64_t mc4Status = 0;
+                    if (peci_RdIAMSR(addr, 0, 0x411, &mc4Status, &cc) !=
+                        PECI_CC_SUCCESS)
+                    {
+                        continue;
+                    }
+                    // TODO: Update MSEC/MSCOD_31_24 check
+                    // Check MSEC bits 31:24 for
+                    // MCA_SVID_VCCIN_VR_ICC_MAX_FAILURE (0x40),
+                    // MCA_SVID_VCCIN_VR_VOUT_FAILURE (0x42), or
+                    // MCA_SVID_CPU_VR_CAPABILITY_ERROR (0x43)
+                    if ((mc4Status & (0x40 << 24)) ||
+                        (mc4Status & (0x42 << 24)) ||
+                        (mc4Status & (0x43 << 24)))
+                    {
+                        cpuIERRLog(cpu, "CPU/VR Mismatch");
+                        continue;
+                    }
+
+                    // Next check if it's a Core FIVR fault by looking for a
+                    // non-zero value of CORE_FIVR_ERR_LOG (B(31) D30 F2 offsets
+                    // C0h and C4h) (Note: Bus 31 is accessed on PECI as bus 14)
+                    uint32_t coreFIVRErrLog0 = 0;
+                    uint32_t coreFIVRErrLog1 = 0;
+                    if (peci_RdEndPointConfigPciLocal(
+                            addr, 0, 14, 30, 2, 0xC0, sizeof(uint32_t),
+                            (uint8_t*)&coreFIVRErrLog0, &cc) != PECI_CC_SUCCESS)
+                    {
+                        continue;
+                    }
+                    if (peci_RdEndPointConfigPciLocal(
+                            addr, 0, 14, 30, 2, 0xC4, sizeof(uint32_t),
+                            (uint8_t*)&coreFIVRErrLog1, &cc) != PECI_CC_SUCCESS)
+                    {
+                        continue;
+                    }
+                    if (coreFIVRErrLog0 || coreFIVRErrLog1)
+                    {
+                        cpuIERRLog(cpu, "Core FIVR Fault");
+                        continue;
+                    }
+
+                    // Next check if it's an Uncore FIVR fault by looking for a
+                    // non-zero value of UNCORE_FIVR_ERR_LOG (B(31) D30 F2
+                    // offset 84h) (Note: Bus 31 is accessed on PECI as bus 14)
+                    uint32_t uncoreFIVRErrLog = 0;
+                    if (peci_RdEndPointConfigPciLocal(
+                            addr, 0, 14, 30, 2, 0x84, sizeof(uint32_t),
+                            (uint8_t*)&uncoreFIVRErrLog,
+                            &cc) != PECI_CC_SUCCESS)
+                    {
+                        continue;
+                    }
+                    if (uncoreFIVRErrLog)
+                    {
+                        cpuIERRLog(cpu, "Uncore FIVR Fault");
+                        continue;
+                    }
+
+                    // TODO: Update MSEC/MSCOD_31_24 check
+                    // Last if CORE_FIVR_ERR_LOG and UNCORE_FIVR_ERR_LOG are
+                    // both zero, but MSEC bits 31:24 have either
+                    // MCA_FIVR_CATAS_OVERVOL_FAULT (0x51) or
+                    // MCA_FIVR_CATAS_OVERCUR_FAULT (0x52), then log it as an
+                    // uncore FIVR fault
+                    if (!coreFIVRErrLog0 && !coreFIVRErrLog1 &&
+                        !uncoreFIVRErrLog &&
+                        ((mc4Status & (0x51 << 24)) ||
+                         (mc4Status & (0x52 << 24))))
+                    {
+                        cpuIERRLog(cpu, "Uncore FIVR Fault");
+                        continue;
+                    }
+                    cpuIERRLog(cpu);
+                }
+                break;
+            }
+        }
+    }
+    return cpuIERRFound;
+}
+
 static void caterrAssertHandler()
 {
-    std::cout << "CPU CATERR detected, starting timer\n";
     caterrAssertTimer.expires_after(std::chrono::milliseconds(caterrTimeoutMs));
     caterrAssertTimer.async_wait([](const boost::system::error_code ec) {
         if (ec)
@@ -259,10 +483,14 @@ static void caterrAssertHandler()
                 std::cerr << "caterr timeout async_wait failed: "
                           << ec.message() << "\n";
             }
-            std::cout << "CATERR assert timer canceled\n";
             return;
         }
-        std::cout << "CATERR asset timer completed\n";
+        std::cerr << "CATERR asserted for " << std::to_string(caterrTimeoutMs)
+                  << " ms\n";
+        if (!checkIERRCPUs())
+        {
+            cpuIERRLog();
+        }
         conn->async_method_call(
             [](boost::system::error_code ec,
                const std::variant<bool>& property) {
