@@ -105,6 +105,13 @@ static void smiTimeoutLog()
                     "REDFISH_MESSAGE_ARGS=%s", "SMI Timeout", NULL);
 }
 
+static void ssbThermTripLog()
+{
+    sd_journal_send("MESSAGE=HostError: SSB thermal trip", "PRIORITY=%i",
+                    LOG_INFO, "REDFISH_MESSAGE_ID=%s",
+                    "OpenBMC.0.1.SsbThermalTrip", NULL);
+}
+
 static void initializeErrorState();
 static void initializeHostState()
 {
@@ -615,11 +622,7 @@ static void pchThermtripHandler()
             gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
         if (pchThermtrip)
         {
-            std::cout << "PCH Thermal trip detected \n";
-            // log to redfish, call API
-            sd_journal_send("MESSAGE=SsbThermalTrip: SSB Thermal trip",
-                            "PRIORITY=%i", LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                            "OpenBMC.0.1.SsbThermalTrip", NULL);
+            ssbThermTripLog();
         }
     }
     pchThermtripEvent.async_wait(
@@ -859,6 +862,12 @@ static void initializeErrorState()
     if (smiLine.get_value() == 0)
     {
         smiAssertHandler();
+    }
+
+    // Handle PCH_BMC_THERMTRIP if it's asserted now
+    if (pchThermtripLine.get_value() == 0)
+    {
+        ssbThermTripLog();
     }
 }
 } // namespace host_error_monitor
