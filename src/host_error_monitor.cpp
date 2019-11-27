@@ -328,7 +328,8 @@ static void startPowerCycle()
             "xyz.openbmc_project.State.Chassis.Transition.PowerCycle"});
 }
 
-static void startCrashdumpAndRecovery(bool recoverSystem)
+static void startCrashdumpAndRecovery(bool recoverSystem,
+                                      const std::string& triggerType)
 {
     std::cout << "Starting crashdump\n";
     static std::shared_ptr<sdbusplus::bus::match::match> crashdumpCompleteMatch;
@@ -376,7 +377,7 @@ static void startCrashdumpAndRecovery(bool recoverSystem)
             }
         },
         "com.intel.crashdump", "/com/intel/crashdump",
-        "com.intel.crashdump.Stored", "GenerateStoredLog");
+        "com.intel.crashdump.Stored", "GenerateStoredLog", triggerType);
 }
 
 static void incrementCPUErrorCount(int cpuNum)
@@ -663,7 +664,7 @@ static void caterrAssertHandler()
                     std::cerr << "Unable to read reset on CATERR value\n";
                     return;
                 }
-                startCrashdumpAndRecovery(*reset);
+                startCrashdumpAndRecovery(*reset, "IERR");
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
@@ -1182,7 +1183,7 @@ static void err2AssertHandler()
                     std::cerr << "Unable to read reset on ERR2 value\n";
                     return;
                 }
-                startCrashdumpAndRecovery(*reset);
+                startCrashdumpAndRecovery(*reset, "ERR2 Timeout");
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
@@ -1251,7 +1252,7 @@ static void smiAssertHandler()
                     std::cerr << "Unable to read reset on SMI value\n";
                     return;
                 }
-                startCrashdumpAndRecovery(*reset);
+                startCrashdumpAndRecovery(*reset, "SMI Timeout");
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/bmc_reset_disables",
