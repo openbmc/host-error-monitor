@@ -27,10 +27,12 @@ namespace host_error_monitor
 {
 static boost::asio::io_service io;
 static std::shared_ptr<sdbusplus::asio::connection> conn;
+static std::shared_ptr<sdbusplus::asio::dbus_interface> hostErrorTimeoutIface;
 
 static bool hostOff = true;
 
-const static constexpr size_t caterrTimeoutMs = 2000;
+static size_t caterrTimeoutMs = 2000;
+const static constexpr size_t caterrTimeoutMsMax = 600000; // 10 minutes maximum
 const static constexpr size_t errTimeoutMs = 90000;
 const static constexpr size_t smiTimeoutMs = 90000;
 const static constexpr size_t crashdumpTimeoutS = 300;
@@ -1392,11 +1394,34 @@ int main(int argc, char* argv[])
     host_error_monitor::conn =
         std::make_shared<sdbusplus::asio::connection>(host_error_monitor::io);
 
-    // Host Error Monitor Object
+    // Host Error Monitor Service
     host_error_monitor::conn->request_name(
         "xyz.openbmc_project.HostErrorMonitor");
     sdbusplus::asio::object_server server =
         sdbusplus::asio::object_server(host_error_monitor::conn);
+
+    // Restart Cause Interface
+    host_error_monitor::hostErrorTimeoutIface =
+        server.add_interface("/xyz/openbmc_project/host_error_monitor",
+                             "xyz.openbmc_project.HostErrorMonitor.Timeout");
+
+    host_error_monitor::hostErrorTimeoutIface->register_property(
+        "IERRTimeoutMs", host_error_monitor::caterrTimeoutMs,
+        [](const std::size_t& requested, std::size_t& resp) {
+            if (requested > host_error_monitor::caterrTimeoutMsMax)
+            {
+                std::cerr << "IERRTimeoutMs update to " << requested
+                          << "ms rejected. Cannot be greater than "
+                          << host_error_monitor::caterrTimeoutMsMax << "ms.\n";
+                return 0;
+            }
+            std::cerr << "IERRTimeoutMs updated to " << requested << "ms\n";
+            host_error_monitor::caterrTimeoutMs = requested;
+            resp = requested;
+            return 1;
+        },
+        [](std::size_t& resp) { return host_error_monitor::caterrTimeoutMs; });
+    host_error_monitor::hostErrorTimeoutIface->initialize();
 
     // Start tracking host state
     std::shared_ptr<sdbusplus::bus::match::match> hostStateMonitor =
