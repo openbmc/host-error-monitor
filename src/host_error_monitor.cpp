@@ -83,6 +83,13 @@ static boost::asio::posix::stream_descriptor cpu2MemEFGHVRHotEvent(io);
 //----------------------------------
 static gpiod::line pchThermtripLine;
 static boost::asio::posix::stream_descriptor pchThermtripEvent(io);
+//----------------------------------
+// CPU_MEM_THERM_EVENT function related definition
+//----------------------------------
+static gpiod::line cpu1MemtripLine;
+static boost::asio::posix::stream_descriptor cpu1MemtripEvent(io);
+static gpiod::line cpu2MemtripLine;
+static boost::asio::posix::stream_descriptor cpu2MemtripEvent(io);
 
 static void cpuIERRLog()
 {
@@ -152,6 +159,17 @@ static void cpuThermTripLog(const int cpuNum)
                     LOG_INFO, "REDFISH_MESSAGE_ID=%s",
                     "OpenBMC.0.1.CPUThermalTrip", "REDFISH_MESSAGE_ARGS=%d",
                     cpuNum, NULL);
+}
+
+static void memThermTripLog(const int cpuNum)
+{
+    std::string cpuNumber = "CPU " + std::to_string(cpuNum);
+    std::string msg = cpuNumber + " Memory Thermal trip.";
+
+    sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
+                    LOG_ERR, "REDFISH_MESSAGE_ID=%s",
+                    "OpenBMC.0.1.MemoryThermTrip", "REDFISH_MESSAGE_ARGS=%s",
+                    cpuNumber.c_str(), NULL);
 }
 
 static void cpuVRHotLog(const std::string& vr)
@@ -742,6 +760,32 @@ static void cpu1ThermtripHandler()
         });
 }
 
+static void cpu1MemtripHandler()
+{
+    if (!hostOff)
+    {
+        gpiod::line_event gpioLineEvent = cpu1MemtripLine.event_read();
+
+        bool cpu1Memtrip =
+            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+        if (cpu1Memtrip)
+        {
+            memThermTripLog(1);
+        }
+    }
+    cpu1MemtripEvent.async_wait(
+        boost::asio::posix::stream_descriptor::wait_read,
+        [](const boost::system::error_code ec) {
+            if (ec)
+            {
+                std::cerr << "CPU 1 Memory Thermaltrip handler error: "
+                          << ec.message() << "\n";
+                return;
+            }
+            cpu1MemtripHandler();
+        });
+}
+
 static void cpu2ThermtripAssertHandler()
 {
     if (cpu2FIVRFaultLine.get_value() == 0)
@@ -777,6 +821,32 @@ static void cpu2ThermtripHandler()
                 return;
             }
             cpu2ThermtripHandler();
+        });
+}
+
+static void cpu2MemtripHandler()
+{
+    if (!hostOff)
+    {
+        gpiod::line_event gpioLineEvent = cpu2MemtripLine.event_read();
+
+        bool cpu2Memtrip =
+            gpioLineEvent.event_type == gpiod::line_event::RISING_EDGE;
+        if (cpu2Memtrip)
+        {
+            memThermTripLog(2);
+        }
+    }
+    cpu2MemtripEvent.async_wait(
+        boost::asio::posix::stream_descriptor::wait_read,
+        [](const boost::system::error_code ec) {
+            if (ec)
+            {
+                std::cerr << "CPU 2 Memory Thermaltrip handler error: "
+                          << ec.message() << "\n";
+                return;
+            }
+            cpu2MemtripHandler();
         });
 }
 
@@ -1344,6 +1414,18 @@ static void initializeErrorState()
         cpu2ThermtripAssertHandler();
     }
 
+    // Handle CPU1_MEM_THERM_EVENT (CPU1 DIMM Thermal trip) if it's asserted now
+    if (cpu1MemtripLine.get_value() == 0)
+    {
+        memThermTripLog(1);
+    }
+
+    // Handle CPU2_MEM_THERM_EVENT (CPU2 DIMM Thermal trip) if it's asserted now
+    if (cpu2MemtripLine.get_value() == 0)
+    {
+        memThermTripLog(2);
+    }
+
     // Handle CPU1_VRHOT if it's asserted now
     if (cpu1VRHotLine.get_value() == 0)
     {
@@ -1561,6 +1643,24 @@ int main(int argc, char* argv[])
             "PCH_BMC_THERMTRIP", host_error_monitor::pchThermtripHandler,
             host_error_monitor::pchThermtripLine,
             host_error_monitor::pchThermtripEvent))
+    {
+        return -1;
+    }
+
+    // Request CPU1_MEM_THERM_EVENT GPIO events
+    if (!host_error_monitor::requestGPIOEvents(
+            "CPU1_MEM_THERM_EVENT", host_error_monitor::cpu1MemtripHandler,
+            host_error_monitor::cpu1MemtripLine,
+            host_error_monitor::cpu1MemtripEvent))
+    {
+        return -1;
+    }
+
+    // Request CPU2_MEM_THERM_EVENT GPIO events
+    if (!host_error_monitor::requestGPIOEvents(
+            "CPU2_MEM_THERM_EVENT", host_error_monitor::cpu2MemtripHandler,
+            host_error_monitor::cpu2MemtripLine,
+            host_error_monitor::cpu2MemtripEvent))
     {
         return -1;
     }
