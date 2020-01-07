@@ -1252,7 +1252,15 @@ static void smiAssertHandler()
                     std::cerr << "Unable to read reset on SMI value\n";
                     return;
                 }
+#ifdef HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT
                 startCrashdumpAndRecovery(*reset, "SMI Timeout");
+#else
+                if (*reset)
+                {
+                    std::cout << "Recovering the system\n";
+                    startPowerCycle();
+                }
+#endif
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/bmc_reset_disables",

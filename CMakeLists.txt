@@ -5,6 +5,13 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable (host-error-monitor src/host_error_monitor.cpp)
 
+option (HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT "Enable crashdump on SMI Timeout."
+        OFF)
+
+target_compile_definitions (host-error-monitor PRIVATE
+                            $<$<BOOL:${HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT}>:
+                            -DHOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT>)
+
 target_include_directories (host-error-monitor PRIVATE ${CMAKE_SOURCE_DIR})
 
 target_link_libraries (host-error-monitor sdbusplus -lsystemd gpiodcxx peci)
