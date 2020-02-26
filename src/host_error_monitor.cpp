@@ -91,6 +91,25 @@ static boost::asio::posix::stream_descriptor cpu1MemtripEvent(io);
 static gpiod::line cpu2MemtripLine;
 static boost::asio::posix::stream_descriptor cpu2MemtripEvent(io);
 
+// beep function for CPU error
+const static constexpr uint8_t beepCPUErr2 = 5;
+
+static void beep(const uint8_t& beepPriority)
+{
+    conn->async_method_call(
+        [](boost::system::error_code ec) {
+            if (ec)
+            {
+                std::cerr << "beep returned error with "
+                             "async_method_call (ec = "
+                          << ec << ")\n";
+                return;
+            }
+        },
+        "xyz.openbmc_project.BeepCode", "/xyz/openbmc_project/BeepCode",
+        "xyz.openbmc_project.BeepCode", "Beep", uint8_t(beepPriority));
+}
+
 static void cpuIERRLog()
 {
     sd_journal_send("MESSAGE=HostError: IERR", "PRIORITY=%i", LOG_INFO,
@@ -1261,6 +1280,8 @@ static void err2AssertHandler()
             "/xyz/openbmc_project/control/processor_error_config",
             "org.freedesktop.DBus.Properties", "Get",
             "xyz.openbmc_project.Control.Processor.ErrConfig", "ResetOnERR2");
+
+        beep(beepCPUErr2);
     });
 }
 
