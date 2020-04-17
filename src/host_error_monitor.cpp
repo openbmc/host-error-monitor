@@ -769,17 +769,15 @@ static void cpu1ThermtripAssertHandler()
 
 static void cpu1ThermtripHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = cpu1ThermtripLine.event_read();
+    gpiod::line_event gpioLineEvent = cpu1ThermtripLine.event_read();
 
-        bool cpu1Thermtrip =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (cpu1Thermtrip)
-        {
-            cpu1ThermtripAssertHandler();
-        }
+    bool cpu1Thermtrip =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (cpu1Thermtrip)
+    {
+        cpu1ThermtripAssertHandler();
     }
+
     cpu1ThermtripEvent.async_wait(
         boost::asio::posix::stream_descriptor::wait_read,
         [](const boost::system::error_code ec) {
@@ -833,17 +831,15 @@ static void cpu2ThermtripAssertHandler()
 
 static void cpu2ThermtripHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = cpu2ThermtripLine.event_read();
+    gpiod::line_event gpioLineEvent = cpu2ThermtripLine.event_read();
 
-        bool cpu2Thermtrip =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (cpu2Thermtrip)
-        {
-            cpu2ThermtripAssertHandler();
-        }
+    bool cpu2Thermtrip =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (cpu2Thermtrip)
+    {
+        cpu2ThermtripAssertHandler();
     }
+
     cpu2ThermtripEvent.async_wait(
         boost::asio::posix::stream_descriptor::wait_read,
         [](const boost::system::error_code ec) {
@@ -890,17 +886,15 @@ static void cpu1VRHotAssertHandler()
 
 static void cpu1VRHotHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = cpu1VRHotLine.event_read();
+    gpiod::line_event gpioLineEvent = cpu1VRHotLine.event_read();
 
-        bool cpu1VRHot =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (cpu1VRHot)
-        {
-            cpu1VRHotAssertHandler();
-        }
+    bool cpu1VRHot =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (cpu1VRHot)
+    {
+        cpu1VRHotAssertHandler();
     }
+
     cpu1VRHotEvent.async_wait(boost::asio::posix::stream_descriptor::wait_read,
                               [](const boost::system::error_code ec) {
                                   if (ec)
@@ -920,17 +914,15 @@ static void cpu1MemABCDVRHotAssertHandler()
 
 static void cpu1MemABCDVRHotHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = cpu1MemABCDVRHotLine.event_read();
+    gpiod::line_event gpioLineEvent = cpu1MemABCDVRHotLine.event_read();
 
-        bool cpu1MemABCDVRHot =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (cpu1MemABCDVRHot)
-        {
-            cpu1MemABCDVRHotAssertHandler();
-        }
+    bool cpu1MemABCDVRHot =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (cpu1MemABCDVRHot)
+    {
+        cpu1MemABCDVRHotAssertHandler();
     }
+
     cpu1MemABCDVRHotEvent.async_wait(
         boost::asio::posix::stream_descriptor::wait_read,
         [](const boost::system::error_code ec) {
@@ -951,17 +943,15 @@ static void cpu1MemEFGHVRHotAssertHandler()
 
 static void cpu1MemEFGHVRHotHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = cpu1MemEFGHVRHotLine.event_read();
+    gpiod::line_event gpioLineEvent = cpu1MemEFGHVRHotLine.event_read();
 
-        bool cpu1MemEFGHVRHot =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (cpu1MemEFGHVRHot)
-        {
-            cpu1MemEFGHVRHotAssertHandler();
-        }
+    bool cpu1MemEFGHVRHot =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (cpu1MemEFGHVRHot)
+    {
+        cpu1MemEFGHVRHotAssertHandler();
     }
+
     cpu1MemEFGHVRHotEvent.async_wait(
         boost::asio::posix::stream_descriptor::wait_read,
         [](const boost::system::error_code ec) {
@@ -982,17 +972,15 @@ static void cpu2VRHotAssertHandler()
 
 static void cpu2VRHotHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = cpu2VRHotLine.event_read();
+    gpiod::line_event gpioLineEvent = cpu2VRHotLine.event_read();
 
-        bool cpu2VRHot =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (cpu2VRHot)
-        {
-            cpu2VRHotAssertHandler();
-        }
+    bool cpu2VRHot =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (cpu2VRHot)
+    {
+        cpu2VRHotAssertHandler();
     }
+
     cpu2VRHotEvent.async_wait(boost::asio::posix::stream_descriptor::wait_read,
                               [](const boost::system::error_code ec) {
                                   if (ec)
@@ -1012,17 +1000,15 @@ static void cpu2MemABCDVRHotAssertHandler()
 
 static void cpu2MemABCDVRHotHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = cpu2MemABCDVRHotLine.event_read();
+    gpiod::line_event gpioLineEvent = cpu2MemABCDVRHotLine.event_read();
 
-        bool cpu2MemABCDVRHot =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (cpu2MemABCDVRHot)
-        {
-            cpu2MemABCDVRHotAssertHandler();
-        }
+    bool cpu2MemABCDVRHot =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (cpu2MemABCDVRHot)
+    {
+        cpu2MemABCDVRHotAssertHandler();
     }
+
     cpu2MemABCDVRHotEvent.async_wait(
         boost::asio::posix::stream_descriptor::wait_read,
         [](const boost::system::error_code ec) {
@@ -1043,17 +1029,15 @@ static void cpu2MemEFGHVRHotAssertHandler()
 
 static void cpu2MemEFGHVRHotHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = cpu2MemEFGHVRHotLine.event_read();
+    gpiod::line_event gpioLineEvent = cpu2MemEFGHVRHotLine.event_read();
 
-        bool cpu2MemEFGHVRHot =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (cpu2MemEFGHVRHot)
-        {
-            cpu2MemEFGHVRHotAssertHandler();
-        }
+    bool cpu2MemEFGHVRHot =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (cpu2MemEFGHVRHot)
+    {
+        cpu2MemEFGHVRHotAssertHandler();
     }
+
     cpu2MemEFGHVRHotEvent.async_wait(
         boost::asio::posix::stream_descriptor::wait_read,
         [](const boost::system::error_code ec) {
@@ -1069,17 +1053,15 @@ static void cpu2MemEFGHVRHotHandler()
 
 static void pchThermtripHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = pchThermtripLine.event_read();
+    gpiod::line_event gpioLineEvent = pchThermtripLine.event_read();
 
-        bool pchThermtrip =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (pchThermtrip)
-        {
-            ssbThermTripLog();
-        }
+    bool pchThermtrip =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (pchThermtrip)
+    {
+        ssbThermTripLog();
     }
+
     pchThermtripEvent.async_wait(
         boost::asio::posix::stream_descriptor::wait_read,
         [](const boost::system::error_code ec) {
