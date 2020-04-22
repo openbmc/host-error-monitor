@@ -98,6 +98,7 @@ static gpiod::line cpu1MismatchLine;
 static gpiod::line cpu2MismatchLine;
 
 // beep function for CPU error
+const static constexpr uint8_t beepCPUIERR = 4;
 const static constexpr uint8_t beepCPUErr2 = 5;
 
 static void beep(const uint8_t& beepPriority)
@@ -701,6 +702,7 @@ static void caterrAssertHandler()
         }
         std::cerr << "CATERR asserted for " << std::to_string(caterrTimeoutMs)
                   << " ms\n";
+        beep(beepCPUIERR);
         if (!checkIERRCPUs())
         {
             cpuIERRLog();
