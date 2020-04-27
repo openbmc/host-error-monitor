@@ -30,6 +30,12 @@ static boost::asio::io_service io;
 static std::shared_ptr<sdbusplus::asio::connection> conn;
 static std::shared_ptr<sdbusplus::asio::dbus_interface> hostErrorTimeoutIface;
 
+using Association = std::tuple<std::string, std::string, std::string>;
+static std::shared_ptr<sdbusplus::asio::dbus_interface> associationSSBThermTrip;
+static std::shared_ptr<sdbusplus::asio::dbus_interface> associationCATAssert;
+
+static const constexpr char* rootPath = "/xyz/openbmc_project/CallbackManager";
+
 static bool hostOff = true;
 
 static size_t caterrTimeoutMs = 2000;
@@ -737,14 +743,24 @@ static void caterrHandler()
 
         bool caterr =
             gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+
+        std::vector<Association> associations;
         if (caterr)
         {
             caterrAssertHandler();
+            associations.emplace_back(
+                "", "critical",
+                "/xyz/openbmc_project/host_error_monitor/cat_error");
+            associations.emplace_back("", "critical",
+                                      host_error_monitor::rootPath);
         }
         else
         {
             caterrAssertTimer.cancel();
+            associations.emplace_back("", "", "");
         }
+        host_error_monitor::associationCATAssert->set_property("Associations",
+                                                               associations);
     }
     caterrEvent.async_wait(boost::asio::posix::stream_descriptor::wait_read,
                            [](const boost::system::error_code ec) {
@@ -1056,6 +1072,8 @@ static void cpu2MemEFGHVRHotHandler()
 
 static void pchThermtripHandler()
 {
+    std::vector<Association> associations;
+
     gpiod::line_event gpioLineEvent = pchThermtripLine.event_read();
 
     bool pchThermtrip =
@@ -1063,7 +1081,17 @@ static void pchThermtripHandler()
     if (pchThermtrip)
     {
         ssbThermTripLog();
+        associations.emplace_back(
+            "", "critical",
+            "/xyz/openbmc_project/host_error_monitor/ssb_thermal_trip");
+        associations.emplace_back("", "critical", host_error_monitor::rootPath);
     }
+    else
+    {
+        associations.emplace_back("", "", "");
+    }
+    host_error_monitor::associationSSBThermTrip->set_property("Associations",
+                                                              associations);
 
     pchThermtripEvent.async_wait(
         boost::asio::posix::stream_descriptor::wait_read,
@@ -1408,6 +1436,12 @@ static void initializeErrorState()
     if (caterrLine.get_value() == 0)
     {
         caterrAssertHandler();
+        std::vector<Association> associations;
+        associations.emplace_back(
+            "", "critical", "/xyz/openbmc_project/host_error_monitor/cat_err");
+        associations.emplace_back("", "critical", host_error_monitor::rootPath);
+        host_error_monitor::associationCATAssert->set_property("Associations",
+                                                               associations);
     }
 
     // Handle CPU_ERR0 if it's asserted now
@@ -1498,6 +1532,13 @@ static void initializeErrorState()
     if (pchThermtripLine.get_value() == 0)
     {
         ssbThermTripLog();
+        std::vector<Association> associations;
+        associations.emplace_back(
+            "", "critical",
+            "/xyz/openbmc_project/host_error_monitor/ssb_thermal_trip");
+        associations.emplace_back("", "critical", host_error_monitor::rootPath);
+        host_error_monitor::associationSSBThermTrip->set_property(
+            "Associations", associations);
     }
 }
 } // namespace host_error_monitor
@@ -1513,6 +1554,23 @@ int main(int argc, char* argv[])
         "xyz.openbmc_project.HostErrorMonitor");
     sdbusplus::asio::object_server server =
         sdbusplus::asio::object_server(host_error_monitor::conn);
+
+    // Associations interface for led status
+    std::vector<host_error_monitor::Association> associations;
+    associations.emplace_back("", "", "");
+    host_error_monitor::associationSSBThermTrip = server.add_interface(
+        "/xyz/openbmc_project/host_error_monitor/ssb_thermal_trip",
+        "xyz.openbmc_project.Association.Definitions");
+    host_error_monitor::associationSSBThermTrip->register_property(
+        "Associations", associations);
+    host_error_monitor::associationSSBThermTrip->initialize();
+
+    host_error_monitor::associationCATAssert = server.add_interface(
+        "/xyz/openbmc_project/host_error_monitor/cat_assert",
+        "xyz.openbmc_project.Association.Definitions");
+    host_error_monitor::associationCATAssert->register_property("Associations",
+                                                                associations);
+    host_error_monitor::associationCATAssert->initialize();
 
     // Restart Cause Interface
     host_error_monitor::hostErrorTimeoutIface =
