@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 3.6)
 project (host-error-monitor CXX)
+include (ExternalProject)
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -7,6 +8,25 @@ add_executable (host-error-monitor src/host_error_monitor.cpp)
 
 option (HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT "Enable crashdump on SMI Timeout."
         OFF)
+
+option (YOCTO "Enable Building in Yocto" OFF)
+
+if (NOT YOCTO)
+    add_dependencies (host-error-monitor libpeci)
+    externalproject_add (libpeci PREFIX ${CMAKE_BINARY_DIR}/libpeci
+                         GIT_REPOSITORY https://github.com/openbmc/libpeci.git
+                         GIT_TAG a2ceec2aa139277cebb62e1eda449ef60fa4c962
+                         INSTALL_COMMAND "")
+
+    externalproject_get_property (libpeci SOURCE_DIR)
+    include_directories (${SOURCE_DIR})
+
+    externalproject_get_property (libpeci BINARY_DIR)
+    add_library (peci SHARED IMPORTED)
+    set_target_properties (peci
+                           PROPERTIES IMPORTED_LOCATION
+                                      ${BINARY_DIR}/libpeci.so)
+endif ()
 
 target_compile_definitions (host-error-monitor PRIVATE
                             $<$<BOOL:${HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT}>:
