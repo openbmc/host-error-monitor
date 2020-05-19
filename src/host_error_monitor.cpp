@@ -812,17 +812,15 @@ static void cpu1ThermtripHandler()
 
 static void cpu1MemtripHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = cpu1MemtripLine.event_read();
+    gpiod::line_event gpioLineEvent = cpu1MemtripLine.event_read();
 
-        bool cpu1Memtrip =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (cpu1Memtrip)
-        {
-            memThermTripLog(1);
-        }
+    bool cpu1Memtrip =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (cpu1Memtrip)
+    {
+        memThermTripLog(1);
     }
+
     cpu1MemtripEvent.async_wait(
         boost::asio::posix::stream_descriptor::wait_read,
         [](const boost::system::error_code ec) {
@@ -874,17 +872,15 @@ static void cpu2ThermtripHandler()
 
 static void cpu2MemtripHandler()
 {
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = cpu2MemtripLine.event_read();
+    gpiod::line_event gpioLineEvent = cpu2MemtripLine.event_read();
 
-        bool cpu2Memtrip =
-            gpioLineEvent.event_type == gpiod::line_event::RISING_EDGE;
-        if (cpu2Memtrip)
-        {
-            memThermTripLog(2);
-        }
+    bool cpu2Memtrip =
+        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
+    if (cpu2Memtrip)
+    {
+        memThermTripLog(2);
     }
+
     cpu2MemtripEvent.async_wait(
         boost::asio::posix::stream_descriptor::wait_read,
         [](const boost::system::error_code ec) {
