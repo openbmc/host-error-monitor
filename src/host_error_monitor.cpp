@@ -16,11 +16,12 @@
 #include <peci.h>
 #include <systemd/sd-journal.h>
 
-#include <bitset>
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <gpiod.hpp>
-#include <iostream>
 #include <sdbusplus/asio/object_server.hpp>
+
+#include <bitset>
+#include <iostream>
 #include <variant>
 
 namespace host_error_monitor
