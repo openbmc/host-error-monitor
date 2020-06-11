@@ -1,0 +1,8 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+2: Jason Bills <jason.m.bills@linux.intel.com>
+Submitted-by: Jason Bills <jason.m.bills@linux.intel.com>
+Submitted-at: Thu, 11 Jun 2020 21:31:22 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/host-error-monitor/+/33478
+Project: openbmc/host-error-monitor
+Branch: refs/heads/master
