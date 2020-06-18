@@ -269,19 +269,30 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
             std::string interfaceName;
             boost::container::flat_map<std::string, std::variant<std::string>>
                 propertiesChanged;
-            std::string state;
             try
             {
                 msg.read(interfaceName, propertiesChanged);
-                state =
-                    std::get<std::string>(propertiesChanged.begin()->second);
             }
             catch (std::exception& e)
             {
                 std::cerr << "Unable to read host state\n";
                 return;
             }
-            hostOff = state == "xyz.openbmc_project.State.Host.HostState.Off";
+            // We only want to check for CurrentHostState
+            if (propertiesChanged.begin()->first != "CurrentHostState")
+            {
+                return;
+            }
+            std::string* state =
+                std::get_if<std::string>(&(propertiesChanged.begin()->second));
+            if (state == nullptr)
+            {
+                std::cerr << propertiesChanged.begin()->first
+                          << " property invalid\n";
+                return;
+            }
+
+            hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
 
             if (hostOff)
             {
