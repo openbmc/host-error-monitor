@@ -263,8 +263,7 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
     return std::make_shared<sdbusplus::bus::match::match>(
         *conn,
         "type='signal',interface='org.freedesktop.DBus.Properties',"
-        "member='PropertiesChanged',arg0namespace='xyz.openbmc_project.State."
-        "Host'",
+        "member='PropertiesChanged',arg0='xyz.openbmc_project.State.Host'",
         [](sdbusplus::message::message& msg) {
             std::string interfaceName;
             boost::container::flat_map<std::string, std::variant<std::string>>
