@@ -399,6 +399,22 @@ static void startPowerCycle()
             "xyz.openbmc_project.State.Chassis.Transition.PowerCycle"});
 }
 
+static void startWarmReset()
+{
+    conn->async_method_call(
+        [](boost::system::error_code ec) {
+            if (ec)
+            {
+                std::cerr << "failed to set Host State\n";
+            }
+        },
+        "xyz.openbmc_project.State.Host", "/xyz/openbmc_project/state/host0",
+        "org.freedesktop.DBus.Properties", "Set",
+        "xyz.openbmc_project.State.Host", "RequestedHostTransition",
+        std::variant<std::string>{
+            "xyz.openbmc_project.State.Host.Transition.ForceWarmReboot"});
+}
+
 static void startCrashdumpAndRecovery(bool recoverSystem,
                                       const std::string& triggerType)
 {
@@ -416,7 +432,7 @@ static void startCrashdumpAndRecovery(bool recoverSystem,
             if (recoverSystem)
             {
                 std::cout << "Recovering the system\n";
-                startPowerCycle();
+                startWarmReset();
             }
             crashdumpCompleteMatch.reset();
         });
@@ -1384,7 +1400,7 @@ static void smiAssertHandler()
                 if (*reset)
                 {
                     std::cout << "Recovering the system\n";
-                    startPowerCycle();
+                    startWarmReset();
                 }
 #endif
             },
