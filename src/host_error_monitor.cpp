@@ -420,7 +420,7 @@ static void startWarmReset()
 static void startCrashdumpAndRecovery(bool recoverSystem,
                                       const std::string& triggerType)
 {
-    std::cout << "Starting crashdump\n";
+    std::cerr << "Starting crashdump\n";
     static std::shared_ptr<sdbusplus::bus::match::match> crashdumpCompleteMatch;
     static boost::asio::steady_timer crashdumpTimer(io);
 
@@ -430,10 +430,10 @@ static void startCrashdumpAndRecovery(bool recoverSystem,
         "member='PropertiesChanged',arg0namespace='com.intel.crashdump'",
         [recoverSystem](sdbusplus::message::message& msg) {
             crashdumpTimer.cancel();
-            std::cout << "Crashdump completed\n";
+            std::cerr << "Crashdump completed\n";
             if (recoverSystem)
             {
-                std::cout << "Recovering the system\n";
+                std::cerr << "Recovering the system\n";
                 startWarmReset();
             }
             crashdumpCompleteMatch.reset();
@@ -449,7 +449,7 @@ static void startCrashdumpAndRecovery(bool recoverSystem,
                 std::cerr << "Crashdump async_wait failed: " << ec.message()
                           << "\n";
             }
-            std::cout << "Crashdump timer canceled\n";
+            std::cerr << "Crashdump timer canceled\n";
             return;
         }
         std::cerr << "Crashdump failed to complete before timeout\n";
@@ -1401,7 +1401,7 @@ static void smiAssertHandler()
 #else
                 if (*reset)
                 {
-                    std::cout << "Recovering the system\n";
+                    std::cerr << "Recovering the system\n";
                     startWarmReset();
                 }
 #endif
