@@ -42,7 +42,6 @@ static size_t caterrTimeoutMs = 2000;
 const static constexpr size_t caterrTimeoutMsMax = 600000; // 10 minutes maximum
 const static constexpr size_t errTimeoutMs = 90000;
 const static constexpr size_t smiTimeoutMs = 90000;
-const static constexpr size_t crashdumpTimeoutS = 300;
 
 // Timers
 // Timer for CATERR asserted
@@ -420,14 +419,12 @@ static void startCrashdumpAndRecovery(bool recoverSystem,
 {
     std::cerr << "Starting crashdump\n";
     static std::shared_ptr<sdbusplus::bus::match::match> crashdumpCompleteMatch;
-    static boost::asio::steady_timer crashdumpTimer(io);
 
     crashdumpCompleteMatch = std::make_shared<sdbusplus::bus::match::match>(
         *conn,
-        "type='signal',interface='org.freedesktop.DBus.Properties',"
-        "member='PropertiesChanged',arg0namespace='com.intel.crashdump'",
+        "type='signal',interface='com.intel.crashdump.Stored',member='"
+        "CrashdumpComplete'",
         [recoverSystem](sdbusplus::message::message& msg) {
-            crashdumpTimer.cancel();
             std::cerr << "Crashdump completed\n";
             if (recoverSystem)
             {
@@ -437,29 +434,11 @@ static void startCrashdumpAndRecovery(bool recoverSystem,
             crashdumpCompleteMatch.reset();
         });
 
-    crashdumpTimer.expires_after(std::chrono::seconds(crashdumpTimeoutS));
-    crashdumpTimer.async_wait([](const boost::system::error_code ec) {
-        if (ec)
-        {
-            // operation_aborted is expected if timer is canceled
-            if (ec != boost::asio::error::operation_aborted)
-            {
-                std::cerr << "Crashdump async_wait failed: " << ec.message()
-                          << "\n";
-            }
-            std::cerr << "Crashdump timer canceled\n";
-            return;
-        }
-        std::cerr << "Crashdump failed to complete before timeout\n";
-        crashdumpCompleteMatch.reset();
-    });
-
     conn->async_method_call(
         [](boost::system::error_code ec) {
             if (ec)
             {
                 std::cerr << "failed to start Crashdump\n";
-                crashdumpTimer.cancel();
             }
         },
         "com.intel.crashdump", "/com/intel/crashdump",
