@@ -462,7 +462,6 @@ static void startCrashdumpAndRecovery(bool recoverSystem,
             {
                 std::cerr << "failed to start Crashdump\n";
                 crashdumpTimer.cancel();
-                crashdumpCompleteMatch.reset();
             }
         },
         "com.intel.crashdump", "/com/intel/crashdump",
