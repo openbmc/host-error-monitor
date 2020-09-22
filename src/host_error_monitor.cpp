@@ -231,6 +231,14 @@ static void ssbThermTripLog()
                     "OpenBMC.0.1.SsbThermalTrip", NULL);
 }
 
+static void printPECIError(const std::string& reg, const size_t addr,
+                           const EPECIStatus peciStatus, const size_t cc)
+{
+    std::cerr << "Failed to read " << reg << " on CPU address " << addr
+              << ". Error: " << peciStatus << ": cc: 0x" << std::hex << cc
+              << "\n";
+}
+
 static void initializeErrorState();
 static void initializeHostState()
 {
@@ -498,9 +506,10 @@ static void incrementCPUErrorCount(int cpuNum)
 static bool checkIERRCPUs()
 {
     bool cpuIERRFound = false;
-    for (int cpu = 0, addr = MIN_CLIENT_ADDR; addr <= MAX_CLIENT_ADDR;
+    for (size_t cpu = 0, addr = MIN_CLIENT_ADDR; addr <= MAX_CLIENT_ADDR;
          cpu++, addr++)
     {
+        EPECIStatus peciStatus = PECI_CC_SUCCESS;
         uint8_t cc = 0;
         CPUModel model{};
         uint8_t stepping = 0;
@@ -517,9 +526,13 @@ static bool checkIERRCPUs()
                 // First check the MCA_ERR_SRC_LOG to see if this is the CPU
                 // that caused the IERR
                 uint32_t mcaErrSrcLog = 0;
-                if (peci_RdPkgConfig(addr, 0, 5, 4, (uint8_t*)&mcaErrSrcLog,
-                                     &cc) != PECI_CC_SUCCESS)
+                peciStatus = peci_RdPkgConfig(addr, 0, 5, 4,
+                                              (uint8_t*)&mcaErrSrcLog, &cc);
+                if (peciStatus != PECI_CC_SUCCESS ||
+                    (cc != PECI_DEV_CC_SUCCESS &&
+                     cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                 {
+                    printPECIError("MCA_ERR_SRC_LOG", addr, peciStatus, cc);
                     continue;
                 }
                 // Check MSMI_INTERNAL (20) and IERR_INTERNAL (27)
@@ -531,9 +544,12 @@ static bool checkIERRCPUs()
                     // Next check if it's a CPU/VR mismatch by reading the
                     // IA32_MC4_STATUS MSR (0x411)
                     uint64_t mc4Status = 0;
-                    if (peci_RdIAMSR(addr, 0, 0x411, &mc4Status, &cc) !=
-                        PECI_CC_SUCCESS)
+                    peciStatus = peci_RdIAMSR(addr, 0, 0x411, &mc4Status, &cc);
+                    if (peciStatus != PECI_CC_SUCCESS ||
+                        (cc != PECI_DEV_CC_SUCCESS &&
+                         cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                     {
+                        printPECIError("IA32_MC4_STATUS", addr, peciStatus, cc);
                         continue;
                     }
                     // Check MSEC bits 31:24 for
@@ -552,10 +568,15 @@ static bool checkIERRCPUs()
                     // non-zero value of CORE_FIVR_ERR_LOG (B(1) D30 F2 offset
                     // 80h)
                     uint32_t coreFIVRErrLog = 0;
-                    if (peci_RdPCIConfigLocal(
-                            addr, 1, 30, 2, 0x80, sizeof(uint32_t),
-                            (uint8_t*)&coreFIVRErrLog, &cc) != PECI_CC_SUCCESS)
+                    peciStatus = peci_RdPCIConfigLocal(
+                        addr, 1, 30, 2, 0x80, sizeof(uint32_t),
+                        (uint8_t*)&coreFIVRErrLog, &cc);
+                    if (peciStatus != PECI_CC_SUCCESS ||
+                        (cc != PECI_DEV_CC_SUCCESS &&
+                         cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                     {
+                        printPECIError("CORE_FIVR_ERR_LOG", addr, peciStatus,
+                                       cc);
                         continue;
                     }
                     if (coreFIVRErrLog)
@@ -568,11 +589,15 @@ static bool checkIERRCPUs()
                     // non-zero value of UNCORE_FIVR_ERR_LOG (B(1) D30 F2 offset
                     // 84h)
                     uint32_t uncoreFIVRErrLog = 0;
-                    if (peci_RdPCIConfigLocal(addr, 1, 30, 2, 0x84,
-                                              sizeof(uint32_t),
-                                              (uint8_t*)&uncoreFIVRErrLog,
-                                              &cc) != PECI_CC_SUCCESS)
+                    peciStatus = peci_RdPCIConfigLocal(
+                        addr, 1, 30, 2, 0x84, sizeof(uint32_t),
+                        (uint8_t*)&uncoreFIVRErrLog, &cc);
+                    if (peciStatus != PECI_CC_SUCCESS ||
+                        (cc != PECI_DEV_CC_SUCCESS &&
+                         cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                     {
+                        printPECIError("UNCORE_FIVR_ERR_LOG", addr, peciStatus,
+                                       cc);
                         continue;
                     }
                     if (uncoreFIVRErrLog)
@@ -602,9 +627,13 @@ static bool checkIERRCPUs()
                 // First check the MCA_ERR_SRC_LOG to see if this is the CPU
                 // that caused the IERR
                 uint32_t mcaErrSrcLog = 0;
-                if (peci_RdPkgConfig(addr, 0, 5, 4, (uint8_t*)&mcaErrSrcLog,
-                                     &cc) != PECI_CC_SUCCESS)
+                peciStatus = peci_RdPkgConfig(addr, 0, 5, 4,
+                                              (uint8_t*)&mcaErrSrcLog, &cc);
+                if (peciStatus != PECI_CC_SUCCESS ||
+                    (cc != PECI_DEV_CC_SUCCESS &&
+                     cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                 {
+                    printPECIError("MCA_ERR_SRC_LOG", addr, peciStatus, cc);
                     continue;
                 }
                 // Check MSMI_INTERNAL (20) and IERR_INTERNAL (27)
@@ -616,9 +645,12 @@ static bool checkIERRCPUs()
                     // Next check if it's a CPU/VR mismatch by reading the
                     // IA32_MC4_STATUS MSR (0x411)
                     uint64_t mc4Status = 0;
-                    if (peci_RdIAMSR(addr, 0, 0x411, &mc4Status, &cc) !=
-                        PECI_CC_SUCCESS)
+                    peciStatus = peci_RdIAMSR(addr, 0, 0x411, &mc4Status, &cc);
+                    if (peciStatus != PECI_CC_SUCCESS ||
+                        (cc != PECI_DEV_CC_SUCCESS &&
+                         cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                     {
+                        printPECIError("IA32_MC4_STATUS", addr, peciStatus, cc);
                         continue;
                     }
                     // TODO: Update MSEC/MSCOD_31_24 check
@@ -639,16 +671,26 @@ static bool checkIERRCPUs()
                     // C0h and C4h) (Note: Bus 31 is accessed on PECI as bus 14)
                     uint32_t coreFIVRErrLog0 = 0;
                     uint32_t coreFIVRErrLog1 = 0;
-                    if (peci_RdEndPointConfigPciLocal(
-                            addr, 0, 14, 30, 2, 0xC0, sizeof(uint32_t),
-                            (uint8_t*)&coreFIVRErrLog0, &cc) != PECI_CC_SUCCESS)
+                    peciStatus = peci_RdEndPointConfigPciLocal(
+                        addr, 0, 14, 30, 2, 0xC0, sizeof(uint32_t),
+                        (uint8_t*)&coreFIVRErrLog0, &cc);
+                    if (peciStatus != PECI_CC_SUCCESS ||
+                        (cc != PECI_DEV_CC_SUCCESS &&
+                         cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                     {
+                        printPECIError("CORE_FIVR_ERR_LOG_0", addr, peciStatus,
+                                       cc);
                         continue;
                     }
-                    if (peci_RdEndPointConfigPciLocal(
-                            addr, 0, 14, 30, 2, 0xC4, sizeof(uint32_t),
-                            (uint8_t*)&coreFIVRErrLog1, &cc) != PECI_CC_SUCCESS)
+                    peciStatus = peci_RdEndPointConfigPciLocal(
+                        addr, 0, 14, 30, 2, 0xC4, sizeof(uint32_t),
+                        (uint8_t*)&coreFIVRErrLog1, &cc);
+                    if (peciStatus != PECI_CC_SUCCESS ||
+                        (cc != PECI_DEV_CC_SUCCESS &&
+                         cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                     {
+                        printPECIError("CORE_FIVR_ERR_LOG_1", addr, peciStatus,
+                                       cc);
                         continue;
                     }
                     if (coreFIVRErrLog0 || coreFIVRErrLog1)
@@ -661,11 +703,15 @@ static bool checkIERRCPUs()
                     // non-zero value of UNCORE_FIVR_ERR_LOG (B(31) D30 F2
                     // offset 84h) (Note: Bus 31 is accessed on PECI as bus 14)
                     uint32_t uncoreFIVRErrLog = 0;
-                    if (peci_RdEndPointConfigPciLocal(
-                            addr, 0, 14, 30, 2, 0x84, sizeof(uint32_t),
-                            (uint8_t*)&uncoreFIVRErrLog,
-                            &cc) != PECI_CC_SUCCESS)
+                    peciStatus = peci_RdEndPointConfigPciLocal(
+                        addr, 0, 14, 30, 2, 0x84, sizeof(uint32_t),
+                        (uint8_t*)&uncoreFIVRErrLog, &cc);
+                    if (peciStatus != PECI_CC_SUCCESS ||
+                        (cc != PECI_DEV_CC_SUCCESS &&
+                         cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                     {
+                        printPECIError("UNCORE_FIVR_ERR_LOG", addr, peciStatus,
+                                       cc);
                         continue;
                     }
                     if (uncoreFIVRErrLog)
@@ -1112,11 +1158,12 @@ static std::bitset<MAX_CPUS> checkERRPinCPUs(const int errPin)
 {
     int errPinSts = (1 << errPin);
     std::bitset<MAX_CPUS> errPinCPUs = 0;
-    for (int cpu = 0, addr = MIN_CLIENT_ADDR; addr <= MAX_CLIENT_ADDR;
+    for (size_t cpu = 0, addr = MIN_CLIENT_ADDR; addr <= MAX_CLIENT_ADDR;
          cpu++, addr++)
     {
         if (peci_Ping(addr) == PECI_CC_SUCCESS)
         {
+            EPECIStatus peciStatus = PECI_CC_SUCCESS;
             uint8_t cc = 0;
             CPUModel model{};
             uint8_t stepping = 0;
@@ -1133,12 +1180,18 @@ static std::bitset<MAX_CPUS> checkERRPinCPUs(const int errPin)
                     // Check the ERRPINSTS to see if this is the CPU that caused
                     // the ERRx (B(0) D8 F0 offset 210h)
                     uint32_t errpinsts = 0;
-                    if (peci_RdPCIConfigLocal(
-                            addr, 0, 8, 0, 0x210, sizeof(uint32_t),
-                            (uint8_t*)&errpinsts, &cc) == PECI_CC_SUCCESS)
+                    peciStatus = peci_RdPCIConfigLocal(
+                        addr, 0, 8, 0, 0x210, sizeof(uint32_t),
+                        (uint8_t*)&errpinsts, &cc);
+                    if (peciStatus != PECI_CC_SUCCESS ||
+                        (cc != PECI_DEV_CC_SUCCESS &&
+                         cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                     {
-                        errPinCPUs[cpu] = (errpinsts & errPinSts) != 0;
+                        printPECIError("ERRPINSTS", addr, peciStatus, cc);
+                        continue;
                     }
+
+                    errPinCPUs[cpu] = (errpinsts & errPinSts) != 0;
                     break;
                 }
                 case icx:
@@ -1147,12 +1200,18 @@ static std::bitset<MAX_CPUS> checkERRPinCPUs(const int errPin)
                     // the ERRx (B(30) D0 F3 offset 274h) (Note: Bus 30 is
                     // accessed on PECI as bus 13)
                     uint32_t errpinsts = 0;
-                    if (peci_RdEndPointConfigPciLocal(
-                            addr, 0, 13, 0, 3, 0x274, sizeof(uint32_t),
-                            (uint8_t*)&errpinsts, &cc) == PECI_CC_SUCCESS)
+                    peciStatus = peci_RdEndPointConfigPciLocal(
+                        addr, 0, 13, 0, 3, 0x274, sizeof(uint32_t),
+                        (uint8_t*)&errpinsts, &cc);
+                    if (peciStatus != PECI_CC_SUCCESS ||
+                        (cc != PECI_DEV_CC_SUCCESS &&
+                         cc != PECI_DEV_CC_FATAL_MCA_DETECTED))
                     {
-                        errPinCPUs[cpu] = (errpinsts & errPinSts) != 0;
+                        printPECIError("ERRPINSTS", addr, peciStatus, cc);
+                        continue;
                     }
+
+                    errPinCPUs[cpu] = (errpinsts & errPinSts) != 0;
                     break;
                 }
             }
