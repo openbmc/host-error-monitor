@@ -559,9 +559,8 @@ static bool checkIERRCPUs()
                     // MCA_SVID_VCCIN_VR_ICC_MAX_FAILURE (0x40),
                     // MCA_SVID_VCCIN_VR_VOUT_FAILURE (0x42), or
                     // MCA_SVID_CPU_VR_CAPABILITY_ERROR (0x43)
-                    if ((mc4Status & (0x40 << 24)) ||
-                        (mc4Status & (0x42 << 24)) ||
-                        (mc4Status & (0x43 << 24)))
+                    uint64_t msec = (mc4Status >> 24) & 0xFF;
+                    if (msec == 0x40 || msec == 0x42 || msec == 0x43)
                     {
                         cpuIERRLog(cpu, "CPU/VR Mismatch");
                         continue;
@@ -611,8 +610,7 @@ static bool checkIERRCPUs()
                     // MCA_FIVR_CATAS_OVERCUR_FAULT (0x52), then log it as an
                     // uncore FIVR fault
                     if (!coreFIVRErrLog && !uncoreFIVRErrLog &&
-                        ((mc4Status & (0x51 << 24)) ||
-                         (mc4Status & (0x52 << 24))))
+                        (msec == 0x51 || msec == 0x52))
                     {
                         cpuIERRLog(cpu, "Uncore FIVR Fault");
                         continue;
@@ -648,14 +646,12 @@ static bool checkIERRCPUs()
                         printPECIError("IA32_MC4_STATUS", addr, peciStatus, cc);
                         continue;
                     }
-                    // TODO: Update MSEC/MSCOD_31_24 check
                     // Check MSEC bits 31:24 for
                     // MCA_SVID_VCCIN_VR_ICC_MAX_FAILURE (0x40),
                     // MCA_SVID_VCCIN_VR_VOUT_FAILURE (0x42), or
                     // MCA_SVID_CPU_VR_CAPABILITY_ERROR (0x43)
-                    if ((mc4Status & (0x40 << 24)) ||
-                        (mc4Status & (0x42 << 24)) ||
-                        (mc4Status & (0x43 << 24)))
+                    uint64_t msec = (mc4Status >> 24) & 0xFF;
+                    if (msec == 0x40 || msec == 0x42 || msec == 0x43)
                     {
                         cpuIERRLog(cpu, "CPU/VR Mismatch");
                         continue;
@@ -716,9 +712,7 @@ static bool checkIERRCPUs()
                     // MCA_FIVR_CATAS_OVERCUR_FAULT (0x52), then log it as an
                     // uncore FIVR fault
                     if (!coreFIVRErrLog0 && !coreFIVRErrLog1 &&
-                        !uncoreFIVRErrLog &&
-                        ((mc4Status & (0x51 << 24)) ||
-                         (mc4Status & (0x52 << 24))))
+                        !uncoreFIVRErrLog && (msec == 0x51 || msec == 0x52))
                     {
                         cpuIERRLog(cpu, "Uncore FIVR Fault");
                         continue;
