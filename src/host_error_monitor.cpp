@@ -19,7 +19,9 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <error_monitors.hpp>
 #include <gpiod.hpp>
+#include <host_error_monitor.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 
 #include <bitset>
@@ -39,11 +41,14 @@ static std::shared_ptr<sdbusplus::asio::dbus_interface> associationCATAssert;
 static const constexpr char* rootPath = "/xyz/openbmc_project/CallbackManager";
 
 static bool hostOff = true;
+bool hostIsOff()
+{
+    return hostOff;
+}
 
 static size_t caterrTimeoutMs = 2000;
 const static constexpr size_t caterrTimeoutMsMax = 600000; // 10 minutes maximum
 const static constexpr size_t errTimeoutMs = 90000;
-const static constexpr size_t smiTimeoutMs = 90000;
 
 // Timers
 // Timer for CATERR asserted
@@ -54,8 +59,6 @@ static boost::asio::steady_timer err0AssertTimer(io);
 static boost::asio::steady_timer err1AssertTimer(io);
 // Timer for ERR2 asserted
 static boost::asio::steady_timer err2AssertTimer(io);
-// Timer for SMI asserted
-static boost::asio::steady_timer smiAssertTimer(io);
 
 // GPIO Lines and Event Descriptors
 static gpiod::line caterrLine;
@@ -66,8 +69,6 @@ static gpiod::line err1Line;
 static boost::asio::posix::stream_descriptor err1Event(io);
 static gpiod::line err2Line;
 static boost::asio::posix::stream_descriptor err2Event(io);
-static gpiod::line smiLine;
-static boost::asio::posix::stream_descriptor smiEvent(io);
 static gpiod::line cpu1FIVRFaultLine;
 static gpiod::line cpu1ThermtripLine;
 static boost::asio::posix::stream_descriptor cpu1ThermtripEvent(io);
@@ -166,13 +167,6 @@ static void cpuERRXLog(const int errPin, const int cpuNum)
     sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
                     LOG_INFO, "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
                     "REDFISH_MESSAGE_ARGS=%s", msg.c_str(), NULL);
-}
-
-static void smiTimeoutLog()
-{
-    sd_journal_send("MESSAGE=HostError: SMI Timeout", "PRIORITY=%i", LOG_INFO,
-                    "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
-                    "REDFISH_MESSAGE_ARGS=%s", "SMI Timeout", NULL);
 }
 
 static void cpuBootFIVRFaultLog(const int cpuNum)
@@ -317,12 +311,12 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
                 err0AssertTimer.cancel();
                 err1AssertTimer.cancel();
                 err2AssertTimer.cancel();
-                smiAssertTimer.cancel();
             }
             else
             {
                 // Handle any initial errors when the host turns on
                 initializeErrorState();
+                error_monitors::sendHostOn();
             }
         });
 }
@@ -396,70 +390,6 @@ static bool requestGPIOInput(const std::string& name, gpiod::line& gpioLine)
     }
 
     return true;
-}
-
-static void startPowerCycle()
-{
-    conn->async_method_call(
-        [](boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "failed to set Chassis State\n";
-            }
-        },
-        "xyz.openbmc_project.State.Chassis",
-        "/xyz/openbmc_project/state/chassis0",
-        "org.freedesktop.DBus.Properties", "Set",
-        "xyz.openbmc_project.State.Chassis", "RequestedPowerTransition",
-        std::variant<std::string>{
-            "xyz.openbmc_project.State.Chassis.Transition.PowerCycle"});
-}
-
-static void startWarmReset()
-{
-    conn->async_method_call(
-        [](boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "failed to set Host State\n";
-            }
-        },
-        "xyz.openbmc_project.State.Host", "/xyz/openbmc_project/state/host0",
-        "org.freedesktop.DBus.Properties", "Set",
-        "xyz.openbmc_project.State.Host", "RequestedHostTransition",
-        std::variant<std::string>{
-            "xyz.openbmc_project.State.Host.Transition.ForceWarmReboot"});
-}
-
-static void startCrashdumpAndRecovery(bool recoverSystem,
-                                      const std::string& triggerType)
-{
-    std::cerr << "Starting crashdump\n";
-    static std::shared_ptr<sdbusplus::bus::match::match> crashdumpCompleteMatch;
-
-    crashdumpCompleteMatch = std::make_shared<sdbusplus::bus::match::match>(
-        *conn,
-        "type='signal',interface='com.intel.crashdump.Stored',member='"
-        "CrashdumpComplete'",
-        [recoverSystem](sdbusplus::message::message& msg) {
-            std::cerr << "Crashdump completed\n";
-            if (recoverSystem)
-            {
-                std::cerr << "Recovering the system\n";
-                startWarmReset();
-            }
-            crashdumpCompleteMatch.reset();
-        });
-
-    conn->async_method_call(
-        [](boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "failed to start Crashdump\n";
-            }
-        },
-        "com.intel.crashdump", "/com/intel/crashdump",
-        "com.intel.crashdump.Stored", "GenerateStoredLog", triggerType);
 }
 
 static void incrementCPUErrorCount(int cpuNum)
@@ -761,7 +691,7 @@ static void caterrAssertHandler()
                     std::cerr << "Unable to read reset on CATERR value\n";
                     return;
                 }
-                startCrashdumpAndRecovery(*reset, "IERR");
+                startCrashdumpAndRecovery(conn, *reset, "IERR");
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
@@ -1341,7 +1271,7 @@ static void err2AssertHandler()
                     std::cerr << "Unable to read reset on ERR2 value\n";
                     return;
                 }
-                startCrashdumpAndRecovery(*reset, "ERR2 Timeout");
+                startCrashdumpAndRecovery(conn, *reset, "ERR2 Timeout");
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
@@ -1379,83 +1309,6 @@ static void err2Handler()
                              }
                              err2Handler();
                          });
-}
-
-static void smiAssertHandler()
-{
-    smiAssertTimer.expires_after(std::chrono::milliseconds(smiTimeoutMs));
-    smiAssertTimer.async_wait([](const boost::system::error_code ec) {
-        if (ec)
-        {
-            // operation_aborted is expected if timer is canceled before
-            // completion.
-            if (ec != boost::asio::error::operation_aborted)
-            {
-                std::cerr << "smi timeout async_wait failed: " << ec.message()
-                          << "\n";
-            }
-            return;
-        }
-        std::cerr << "SMI asserted for " << std::to_string(smiTimeoutMs)
-                  << " ms\n";
-        smiTimeoutLog();
-        conn->async_method_call(
-            [](boost::system::error_code ec,
-               const std::variant<bool>& property) {
-                if (ec)
-                {
-                    return;
-                }
-                const bool* reset = std::get_if<bool>(&property);
-                if (reset == nullptr)
-                {
-                    std::cerr << "Unable to read reset on SMI value\n";
-                    return;
-                }
-#ifdef HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT
-                startCrashdumpAndRecovery(*reset, "SMI Timeout");
-#else
-                if (*reset)
-                {
-                    std::cerr << "Recovering the system\n";
-                    startWarmReset();
-                }
-#endif
-            },
-            "xyz.openbmc_project.Settings",
-            "/xyz/openbmc_project/control/bmc_reset_disables",
-            "org.freedesktop.DBus.Properties", "Get",
-            "xyz.openbmc_project.Control.ResetDisables", "ResetOnSMI");
-    });
-}
-
-static void smiHandler()
-{
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = smiLine.event_read();
-
-        bool smi = gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (smi)
-        {
-            smiAssertHandler();
-        }
-        else
-        {
-            smiAssertTimer.cancel();
-        }
-    }
-    smiEvent.async_wait(boost::asio::posix::stream_descriptor::wait_read,
-                        [](const boost::system::error_code ec) {
-                            if (ec)
-                            {
-                                std::cerr
-                                    << "smi handler error: " << ec.message()
-                                    << "\n";
-                                return;
-                            }
-                            smiHandler();
-                        });
 }
 
 static void initializeErrorState()
@@ -1500,12 +1353,6 @@ static void initializeErrorState()
     if (err2Line.get_value() == 0)
     {
         err2AssertHandler();
-    }
-
-    // Handle SMI if it's asserted now
-    if (smiLine.get_value() == 0)
-    {
-        smiAssertHandler();
     }
 
     // Handle CPU1_THERMTRIP if it's asserted now
@@ -1688,14 +1535,6 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    // Request SMI GPIO events
-    if (!host_error_monitor::requestGPIOEvents(
-            "SMI", host_error_monitor::smiHandler, host_error_monitor::smiLine,
-            host_error_monitor::smiEvent))
-    {
-        return -1;
-    }
-
     // Request CPU1_FIVR_FAULT GPIO input
     if (!host_error_monitor::requestGPIOInput(
             "CPU1_FIVR_FAULT", host_error_monitor::cpu1FIVRFaultLine))
@@ -1808,6 +1647,9 @@ int main(int argc, char* argv[])
     {
         return -1;
     }
+
+    host_error_monitor::error_monitors::startMonitors(host_error_monitor::io,
+                                                      host_error_monitor::conn);
 
     host_error_monitor::io.run();
 
