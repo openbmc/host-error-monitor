@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 #pragma once
+#include <error_monitors/cpu1_mismatch_monitor.hpp>
 #include <error_monitors/smi_monitor.hpp>
 
 #include <memory>
@@ -22,6 +23,9 @@ namespace host_error_monitor::error_monitors
 {
 // Error signals to monitor
 static std::unique_ptr<host_error_monitor::smi_monitor::SMIMonitor> smiMonitor;
+static std::unique_ptr<
+    host_error_monitor::cpu1_mismatch_monitor::CPU1MismatchMonitor>
+    cpu1MismatchMonitor;
 
 // Start the signal monitors
 void startMonitors(boost::asio::io_service& io,
@@ -29,12 +33,16 @@ void startMonitors(boost::asio::io_service& io,
 {
     smiMonitor =
         std::make_unique<host_error_monitor::smi_monitor::SMIMonitor>(io, conn);
+    cpu1MismatchMonitor = std::make_unique<
+        host_error_monitor::cpu1_mismatch_monitor::CPU1MismatchMonitor>(io,
+                                                                        conn);
 }
 
 // Notify the signal monitors of host on event
 void sendHostOn()
 {
     smiMonitor->hostOn();
+    cpu1MismatchMonitor->hostOn();
 }
 
 } // namespace host_error_monitor::error_monitors

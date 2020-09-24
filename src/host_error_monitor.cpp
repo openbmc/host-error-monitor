@@ -102,7 +102,6 @@ static boost::asio::posix::stream_descriptor cpu2MemtripEvent(io);
 //---------------------------------
 // CPU_MISMATCH function related definition
 //---------------------------------
-static gpiod::line cpu1MismatchLine;
 static gpiod::line cpu2MismatchLine;
 
 // beep function for CPU error
@@ -1313,12 +1312,6 @@ static void err2Handler()
 
 static void initializeErrorState()
 {
-    // Handle CPU1_MISMATCH if it's asserted now
-    if (cpu1MismatchLine.get_value() == 1)
-    {
-        cpuMismatchLog(1);
-    }
-
     // Handle CPU2_MISMATCH if it's asserted now
     if (cpu2MismatchLine.get_value() == 1)
     {
@@ -1485,13 +1478,6 @@ int main(int argc, char* argv[])
     // Start tracking host state
     std::shared_ptr<sdbusplus::bus::match::match> hostStateMonitor =
         host_error_monitor::startHostStateMonitor();
-
-    // Request CPU1_MISMATCH GPIO events
-    if (!host_error_monitor::requestGPIOInput(
-            "CPU1_MISMATCH", host_error_monitor::cpu1MismatchLine))
-    {
-        return -1;
-    }
 
     // Request CPU2_MISMATCH GPIO events
     if (!host_error_monitor::requestGPIOInput(
