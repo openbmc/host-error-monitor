@@ -99,11 +99,6 @@ static gpiod::line cpu1MemtripLine;
 static boost::asio::posix::stream_descriptor cpu1MemtripEvent(io);
 static gpiod::line cpu2MemtripLine;
 static boost::asio::posix::stream_descriptor cpu2MemtripEvent(io);
-//---------------------------------
-// CPU_MISMATCH function related definition
-//---------------------------------
-static gpiod::line cpu1MismatchLine;
-static gpiod::line cpu2MismatchLine;
 
 // beep function for CPU error
 const static constexpr uint8_t beepCPUIERR = 4;
@@ -197,15 +192,6 @@ static void memThermTripLog(const int cpuNum)
                     LOG_ERR, "REDFISH_MESSAGE_ID=%s",
                     "OpenBMC.0.1.MemoryThermTrip", "REDFISH_MESSAGE_ARGS=%s",
                     cpuNumber.c_str(), NULL);
-}
-
-static void cpuMismatchLog(const int cpuNum)
-{
-    std::string msg = "CPU " + std::to_string(cpuNum) + " mismatch";
-
-    sd_journal_send("MESSAGE= %s", msg.c_str(), "PRIORITY=%i", LOG_ERR,
-                    "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUMismatch",
-                    "REDFISH_MESSAGE_ARGS=%d", cpuNum, NULL);
 }
 
 static void cpuVRHotLog(const std::string& vr)
@@ -1320,18 +1306,6 @@ static void err2Handler()
 
 static void initializeErrorState()
 {
-    // Handle CPU1_MISMATCH if it's asserted now
-    if (cpu1MismatchLine.get_value() == 1)
-    {
-        cpuMismatchLog(1);
-    }
-
-    // Handle CPU2_MISMATCH if it's asserted now
-    if (cpu2MismatchLine.get_value() == 1)
-    {
-        cpuMismatchLog(2);
-    }
-
     // Handle CPU_CATERR if it's asserted now
     if (caterrLine.get_value() == 0)
     {
@@ -1492,20 +1466,6 @@ int main(int argc, char* argv[])
     // Start tracking host state
     std::shared_ptr<sdbusplus::bus::match::match> hostStateMonitor =
         host_error_monitor::startHostStateMonitor();
-
-    // Request CPU1_MISMATCH GPIO events
-    if (!host_error_monitor::requestGPIOInput(
-            "CPU1_MISMATCH", host_error_monitor::cpu1MismatchLine))
-    {
-        return -1;
-    }
-
-    // Request CPU2_MISMATCH GPIO events
-    if (!host_error_monitor::requestGPIOInput(
-            "CPU2_MISMATCH", host_error_monitor::cpu2MismatchLine))
-    {
-        return -1;
-    }
 
     // Request CPU_CATERR GPIO events
     if (!host_error_monitor::requestGPIOEvents(
