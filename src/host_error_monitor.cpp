@@ -53,20 +53,12 @@ const static constexpr size_t errTimeoutMs = 90000;
 // Timers
 // Timer for CATERR asserted
 static boost::asio::steady_timer caterrAssertTimer(io);
-// Timer for ERR0 asserted
-static boost::asio::steady_timer err0AssertTimer(io);
-// Timer for ERR1 asserted
-static boost::asio::steady_timer err1AssertTimer(io);
 // Timer for ERR2 asserted
 static boost::asio::steady_timer err2AssertTimer(io);
 
 // GPIO Lines and Event Descriptors
 static gpiod::line caterrLine;
 static boost::asio::posix::stream_descriptor caterrEvent(io);
-static gpiod::line err0Line;
-static boost::asio::posix::stream_descriptor err0Event(io);
-static gpiod::line err1Line;
-static boost::asio::posix::stream_descriptor err1Event(io);
 static gpiod::line err2Line;
 static boost::asio::posix::stream_descriptor err2Event(io);
 static gpiod::line cpu1FIVRFaultLine;
@@ -211,21 +203,6 @@ static void ssbThermTripLog()
                     "OpenBMC.0.1.SsbThermalTrip", NULL);
 }
 
-static inline bool peciError(EPECIStatus peciStatus, uint8_t cc)
-{
-    return (
-        peciStatus != PECI_CC_SUCCESS ||
-        (cc != PECI_DEV_CC_SUCCESS && cc != PECI_DEV_CC_FATAL_MCA_DETECTED));
-}
-
-static void printPECIError(const std::string& reg, const size_t addr,
-                           const EPECIStatus peciStatus, const size_t cc)
-{
-    std::cerr << "Failed to read " << reg << " on CPU address " << addr
-              << ". Error: " << peciStatus << ": cc: 0x" << std::hex << cc
-              << "\n";
-}
-
 static void initializeErrorState();
 static void initializeHostState()
 {
@@ -294,8 +271,6 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
                 // No host events should fire while off, so cancel any pending
                 // timers
                 caterrAssertTimer.cancel();
-                err0AssertTimer.cancel();
-                err1AssertTimer.cancel();
                 err2AssertTimer.cancel();
             }
             else
@@ -1154,78 +1129,6 @@ static void errXAssertHandler(const int errPin,
     });
 }
 
-static void err0AssertHandler()
-{
-    // Handle the standard ERR0 detection and logging
-    const static constexpr int err0 = 0;
-    errXAssertHandler(err0, err0AssertTimer);
-}
-
-static void err0Handler()
-{
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = err0Line.event_read();
-
-        bool err0 = gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (err0)
-        {
-            err0AssertHandler();
-        }
-        else
-        {
-            err0AssertTimer.cancel();
-        }
-    }
-    err0Event.async_wait(boost::asio::posix::stream_descriptor::wait_read,
-                         [](const boost::system::error_code ec) {
-                             if (ec)
-                             {
-                                 std::cerr
-                                     << "err0 handler error: " << ec.message()
-                                     << "\n";
-                                 return;
-                             }
-                             err0Handler();
-                         });
-}
-
-static void err1AssertHandler()
-{
-    // Handle the standard ERR1 detection and logging
-    const static constexpr int err1 = 1;
-    errXAssertHandler(err1, err1AssertTimer);
-}
-
-static void err1Handler()
-{
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = err1Line.event_read();
-
-        bool err1 = gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (err1)
-        {
-            err1AssertHandler();
-        }
-        else
-        {
-            err1AssertTimer.cancel();
-        }
-    }
-    err1Event.async_wait(boost::asio::posix::stream_descriptor::wait_read,
-                         [](const boost::system::error_code ec) {
-                             if (ec)
-                             {
-                                 std::cerr
-                                     << "err1 handler error: " << ec.message()
-                                     << "\n";
-                                 return;
-                             }
-                             err1Handler();
-                         });
-}
-
 static void err2AssertHandler()
 {
     // Handle the standard ERR2 detection and logging
@@ -1309,18 +1212,6 @@ static void initializeErrorState()
         associations.emplace_back("", "critical", host_error_monitor::rootPath);
         host_error_monitor::associationCATAssert->set_property("Associations",
                                                                associations);
-    }
-
-    // Handle CPU_ERR0 if it's asserted now
-    if (err0Line.get_value() == 0)
-    {
-        err0AssertHandler();
-    }
-
-    // Handle CPU_ERR1 if it's asserted now
-    if (err1Line.get_value() == 0)
-    {
-        err1AssertHandler();
     }
 
     // Handle CPU_ERR2 if it's asserted now
@@ -1467,22 +1358,6 @@ int main(int argc, char* argv[])
     if (!host_error_monitor::requestGPIOEvents(
             "CPU_CATERR", host_error_monitor::caterrHandler,
             host_error_monitor::caterrLine, host_error_monitor::caterrEvent))
-    {
-        return -1;
-    }
-
-    // Request CPU_ERR0 GPIO events
-    if (!host_error_monitor::requestGPIOEvents(
-            "CPU_ERR0", host_error_monitor::err0Handler,
-            host_error_monitor::err0Line, host_error_monitor::err0Event))
-    {
-        return -1;
-    }
-
-    // Request CPU_ERR1 GPIO events
-    if (!host_error_monitor::requestGPIOEvents(
-            "CPU_ERR1", host_error_monitor::err1Handler,
-            host_error_monitor::err1Line, host_error_monitor::err1Event))
     {
         return -1;
     }
