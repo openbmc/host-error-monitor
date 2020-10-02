@@ -87,4 +87,19 @@ void startCrashdumpAndRecovery(
         "com.intel.crashdump.Stored", "GenerateStoredLog", triggerType);
 }
 
+static inline bool peciError(EPECIStatus peciStatus, uint8_t cc)
+{
+    return (
+        peciStatus != PECI_CC_SUCCESS ||
+        (cc != PECI_DEV_CC_SUCCESS && cc != PECI_DEV_CC_FATAL_MCA_DETECTED));
+}
+
+static void printPECIError(const std::string& reg, const size_t addr,
+                           const EPECIStatus peciStatus, const size_t cc)
+{
+    std::cerr << "Failed to read " << reg << " on CPU address " << addr
+              << ". Error: " << peciStatus << ": cc: 0x" << std::hex << cc
+              << "\n";
+}
+
 } // namespace host_error_monitor
