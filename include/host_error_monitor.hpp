@@ -107,4 +107,21 @@ static void printPECIError(const std::string& reg, const size_t addr,
               << "\n";
 }
 
+static void beep(std::shared_ptr<sdbusplus::asio::connection> conn,
+                 const uint8_t& beepPriority)
+{
+    conn->async_method_call(
+        [](boost::system::error_code ec) {
+            if (ec)
+            {
+                std::cerr << "beep returned error with "
+                             "async_method_call (ec = "
+                          << ec << ")\n";
+                return;
+            }
+        },
+        "xyz.openbmc_project.BeepCode", "/xyz/openbmc_project/BeepCode",
+        "xyz.openbmc_project.BeepCode", "Beep", uint8_t(beepPriority));
+}
+
 } // namespace host_error_monitor
