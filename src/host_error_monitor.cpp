@@ -48,19 +48,14 @@ bool hostIsOff()
 
 static size_t caterrTimeoutMs = 2000;
 const static constexpr size_t caterrTimeoutMsMax = 600000; // 10 minutes maximum
-const static constexpr size_t errTimeoutMs = 90000;
 
 // Timers
 // Timer for CATERR asserted
 static boost::asio::steady_timer caterrAssertTimer(io);
-// Timer for ERR2 asserted
-static boost::asio::steady_timer err2AssertTimer(io);
 
 // GPIO Lines and Event Descriptors
 static gpiod::line caterrLine;
 static boost::asio::posix::stream_descriptor caterrEvent(io);
-static gpiod::line err2Line;
-static boost::asio::posix::stream_descriptor err2Event(io);
 static gpiod::line cpu1FIVRFaultLine;
 static gpiod::line cpu1ThermtripLine;
 static boost::asio::posix::stream_descriptor cpu1ThermtripEvent(io);
@@ -94,23 +89,6 @@ static boost::asio::posix::stream_descriptor cpu2MemtripEvent(io);
 
 // beep function for CPU error
 const static constexpr uint8_t beepCPUIERR = 4;
-const static constexpr uint8_t beepCPUErr2 = 5;
-
-static void beep(const uint8_t& beepPriority)
-{
-    conn->async_method_call(
-        [](boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "beep returned error with "
-                             "async_method_call (ec = "
-                          << ec << ")\n";
-                return;
-            }
-        },
-        "xyz.openbmc_project.BeepCode", "/xyz/openbmc_project/BeepCode",
-        "xyz.openbmc_project.BeepCode", "Beep", uint8_t(beepPriority));
-}
 
 static void cpuIERRLog()
 {
@@ -131,25 +109,6 @@ static void cpuIERRLog(const int cpuNum)
 static void cpuIERRLog(const int cpuNum, const std::string& type)
 {
     std::string msg = type + " IERR on CPU " + std::to_string(cpuNum + 1);
-
-    sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                    LOG_INFO, "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
-                    "REDFISH_MESSAGE_ARGS=%s", msg.c_str(), NULL);
-}
-
-static void cpuERRXLog(const int errPin)
-{
-    std::string msg = "ERR" + std::to_string(errPin) + " Timeout";
-
-    sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                    LOG_INFO, "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
-                    "REDFISH_MESSAGE_ARGS=%s", msg.c_str(), NULL);
-}
-
-static void cpuERRXLog(const int errPin, const int cpuNum)
-{
-    std::string msg = "ERR" + std::to_string(errPin) + " Timeout on CPU " +
-                      std::to_string(cpuNum + 1);
 
     sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
                     LOG_INFO, "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
@@ -278,7 +237,6 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
                 // No host events should fire while off, so cancel any pending
                 // timers
                 caterrAssertTimer.cancel();
-                err2AssertTimer.cancel();
             }
             else
             {
@@ -641,7 +599,7 @@ static void caterrAssertHandler()
         }
         std::cerr << "CATERR asserted for " << std::to_string(caterrTimeoutMs)
                   << " ms\n";
-        beep(beepCPUIERR);
+        beep(conn, beepCPUIERR);
         if (!checkIERRCPUs())
         {
             cpuIERRLog();
@@ -1035,178 +993,6 @@ static void pchThermtripHandler()
         });
 }
 
-static std::bitset<MAX_CPUS> checkERRPinCPUs(const int errPin)
-{
-    int errPinSts = (1 << errPin);
-    std::bitset<MAX_CPUS> errPinCPUs = 0;
-    for (size_t cpu = 0, addr = MIN_CLIENT_ADDR; addr <= MAX_CLIENT_ADDR;
-         cpu++, addr++)
-    {
-        if (peci_Ping(addr) == PECI_CC_SUCCESS)
-        {
-            EPECIStatus peciStatus = PECI_CC_SUCCESS;
-            uint8_t cc = 0;
-            CPUModel model{};
-            uint8_t stepping = 0;
-            if (peci_GetCPUID(addr, &model, &stepping, &cc) != PECI_CC_SUCCESS)
-            {
-                std::cerr << "Cannot get CPUID!\n";
-                continue;
-            }
-
-            switch (model)
-            {
-                case skx:
-                {
-                    // Check the ERRPINSTS to see if this is the CPU that caused
-                    // the ERRx (B(0) D8 F0 offset 210h)
-                    uint32_t errpinsts = 0;
-                    peciStatus = peci_RdPCIConfigLocal(
-                        addr, 0, 8, 0, 0x210, sizeof(uint32_t),
-                        (uint8_t*)&errpinsts, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("ERRPINSTS", addr, peciStatus, cc);
-                        continue;
-                    }
-
-                    errPinCPUs[cpu] = (errpinsts & errPinSts) != 0;
-                    break;
-                }
-                case icx:
-                {
-                    // Check the ERRPINSTS to see if this is the CPU that caused
-                    // the ERRx (B(30) D0 F3 offset 274h) (Note: Bus 30 is
-                    // accessed on PECI as bus 13)
-                    uint32_t errpinsts = 0;
-                    peciStatus = peci_RdEndPointConfigPciLocal(
-                        addr, 0, 13, 0, 3, 0x274, sizeof(uint32_t),
-                        (uint8_t*)&errpinsts, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("ERRPINSTS", addr, peciStatus, cc);
-                        continue;
-                    }
-
-                    errPinCPUs[cpu] = (errpinsts & errPinSts) != 0;
-                    break;
-                }
-            }
-        }
-    }
-    return errPinCPUs;
-}
-
-static void errXAssertHandler(const int errPin,
-                              boost::asio::steady_timer& errXAssertTimer)
-{
-    // ERRx status is not guaranteed through the timeout, so save which
-    // CPUs have it asserted
-    std::bitset<MAX_CPUS> errPinCPUs = checkERRPinCPUs(errPin);
-    errXAssertTimer.expires_after(std::chrono::milliseconds(errTimeoutMs));
-    errXAssertTimer.async_wait([errPin, errPinCPUs](
-                                   const boost::system::error_code ec) {
-        if (ec)
-        {
-            // operation_aborted is expected if timer is canceled before
-            // completion.
-            if (ec != boost::asio::error::operation_aborted)
-            {
-                std::cerr << "err2 timeout async_wait failed: " << ec.message()
-                          << "\n";
-            }
-            return;
-        }
-        std::cerr << "ERR" << std::to_string(errPin) << " asserted for "
-                  << std::to_string(errTimeoutMs) << " ms\n";
-        if (errPinCPUs.count())
-        {
-            for (int i = 0; i < errPinCPUs.size(); i++)
-            {
-                if (errPinCPUs[i])
-                {
-                    cpuERRXLog(errPin, i);
-                }
-            }
-        }
-        else
-        {
-            cpuERRXLog(errPin);
-        }
-    });
-}
-
-static void err2AssertHandler()
-{
-    // Handle the standard ERR2 detection and logging
-    const static constexpr int err2 = 2;
-    errXAssertHandler(err2, err2AssertTimer);
-    // Also handle reset for ERR2
-    err2AssertTimer.async_wait([](const boost::system::error_code ec) {
-        if (ec)
-        {
-            // operation_aborted is expected if timer is canceled before
-            // completion.
-            if (ec != boost::asio::error::operation_aborted)
-            {
-                std::cerr << "err2 timeout async_wait failed: " << ec.message()
-                          << "\n";
-            }
-            return;
-        }
-        conn->async_method_call(
-            [](boost::system::error_code ec,
-               const std::variant<bool>& property) {
-                if (ec)
-                {
-                    return;
-                }
-                const bool* reset = std::get_if<bool>(&property);
-                if (reset == nullptr)
-                {
-                    std::cerr << "Unable to read reset on ERR2 value\n";
-                    return;
-                }
-                startCrashdumpAndRecovery(conn, *reset, "ERR2 Timeout");
-            },
-            "xyz.openbmc_project.Settings",
-            "/xyz/openbmc_project/control/processor_error_config",
-            "org.freedesktop.DBus.Properties", "Get",
-            "xyz.openbmc_project.Control.Processor.ErrConfig", "ResetOnERR2");
-
-        beep(beepCPUErr2);
-    });
-}
-
-static void err2Handler()
-{
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = err2Line.event_read();
-
-        bool err2 = gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-        if (err2)
-        {
-            err2AssertHandler();
-        }
-        else
-        {
-            err2AssertTimer.cancel();
-        }
-    }
-    err2Event.async_wait(boost::asio::posix::stream_descriptor::wait_read,
-                         [](const boost::system::error_code ec) {
-                             if (ec)
-                             {
-                                 std::cerr
-                                     << "err2 handler error: " << ec.message()
-                                     << "\n";
-                                 return;
-                             }
-                             err2Handler();
-                         });
-}
-
 static void initializeErrorState()
 {
     // Handle CPU_CATERR if it's asserted now
@@ -1219,12 +1005,6 @@ static void initializeErrorState()
         associations.emplace_back("", "critical", host_error_monitor::rootPath);
         host_error_monitor::associationCATAssert->set_property("Associations",
                                                                associations);
-    }
-
-    // Handle CPU_ERR2 if it's asserted now
-    if (err2Line.get_value() == 0)
-    {
-        err2AssertHandler();
     }
 
     // Handle CPU1_THERMTRIP if it's asserted now
@@ -1362,14 +1142,6 @@ int main(int argc, char* argv[])
     if (!host_error_monitor::requestGPIOEvents(
             "CPU_CATERR", host_error_monitor::caterrHandler,
             host_error_monitor::caterrLine, host_error_monitor::caterrEvent))
-    {
-        return -1;
-    }
-
-    // Request CPU_ERR2 GPIO events
-    if (!host_error_monitor::requestGPIOEvents(
-            "CPU_ERR2", host_error_monitor::err2Handler,
-            host_error_monitor::err2Line, host_error_monitor::err2Event))
     {
         return -1;
     }
