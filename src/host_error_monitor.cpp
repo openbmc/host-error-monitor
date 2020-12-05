@@ -20,6 +20,7 @@
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <gpiod.hpp>
+#include <host_error_monitor.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 
 #include <bitset>
@@ -39,6 +40,10 @@ static std::shared_ptr<sdbusplus::asio::dbus_interface> associationCATAssert;
 static const constexpr char* rootPath = "/xyz/openbmc_project/CallbackManager";
 
 static bool hostOff = true;
+bool hostIsOff()
+{
+    return hostOff;
+}
 
 static size_t caterrTimeoutMs = 2000;
 const static constexpr size_t caterrTimeoutMsMax = 600000; // 10 minutes maximum
@@ -398,70 +403,6 @@ static bool requestGPIOInput(const std::string& name, gpiod::line& gpioLine)
     return true;
 }
 
-static void startPowerCycle()
-{
-    conn->async_method_call(
-        [](boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "failed to set Chassis State\n";
-            }
-        },
-        "xyz.openbmc_project.State.Chassis",
-        "/xyz/openbmc_project/state/chassis0",
-        "org.freedesktop.DBus.Properties", "Set",
-        "xyz.openbmc_project.State.Chassis", "RequestedPowerTransition",
-        std::variant<std::string>{
-            "xyz.openbmc_project.State.Chassis.Transition.PowerCycle"});
-}
-
-static void startWarmReset()
-{
-    conn->async_method_call(
-        [](boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "failed to set Host State\n";
-            }
-        },
-        "xyz.openbmc_project.State.Host", "/xyz/openbmc_project/state/host0",
-        "org.freedesktop.DBus.Properties", "Set",
-        "xyz.openbmc_project.State.Host", "RequestedHostTransition",
-        std::variant<std::string>{
-            "xyz.openbmc_project.State.Host.Transition.ForceWarmReboot"});
-}
-
-static void startCrashdumpAndRecovery(bool recoverSystem,
-                                      const std::string& triggerType)
-{
-    std::cerr << "Starting crashdump\n";
-    static std::shared_ptr<sdbusplus::bus::match::match> crashdumpCompleteMatch;
-
-    crashdumpCompleteMatch = std::make_shared<sdbusplus::bus::match::match>(
-        *conn,
-        "type='signal',interface='com.intel.crashdump.Stored',member='"
-        "CrashdumpComplete'",
-        [recoverSystem](sdbusplus::message::message& msg) {
-            std::cerr << "Crashdump completed\n";
-            if (recoverSystem)
-            {
-                std::cerr << "Recovering the system\n";
-                startWarmReset();
-            }
-            crashdumpCompleteMatch.reset();
-        });
-
-    conn->async_method_call(
-        [](boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "failed to start Crashdump\n";
-            }
-        },
-        "com.intel.crashdump", "/com/intel/crashdump",
-        "com.intel.crashdump.Stored", "GenerateStoredLog", triggerType);
-}
-
 static void incrementCPUErrorCount(int cpuNum)
 {
     std::string propertyName = "ErrorCountCPU" + std::to_string(cpuNum + 1);
@@ -761,7 +702,7 @@ static void caterrAssertHandler()
                     std::cerr << "Unable to read reset on CATERR value\n";
                     return;
                 }
-                startCrashdumpAndRecovery(*reset, "IERR");
+                startCrashdumpAndRecovery(conn, *reset, "IERR");
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
@@ -1341,7 +1282,7 @@ static void err2AssertHandler()
                     std::cerr << "Unable to read reset on ERR2 value\n";
                     return;
                 }
-                startCrashdumpAndRecovery(*reset, "ERR2 Timeout");
+                startCrashdumpAndRecovery(conn, *reset, "ERR2 Timeout");
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
