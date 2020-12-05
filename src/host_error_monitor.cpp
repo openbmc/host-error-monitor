@@ -19,6 +19,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <error_monitors.hpp>
 #include <gpiod.hpp>
 #include <host_error_monitor.hpp>
 #include <sdbusplus/asio/object_server.hpp>
@@ -252,8 +253,9 @@ static void printPECIError(const std::string& reg, const size_t addr,
 }
 
 static void initializeErrorState();
-static void initializeHostState()
+static void init()
 {
+    // Get the current host state to prepare to start the signal monitors
     conn->async_method_call(
         [](boost::system::error_code ec,
            const std::variant<std::string>& property) {
@@ -272,6 +274,12 @@ static void initializeHostState()
             if (!hostOff)
             {
                 initializeErrorState();
+            }
+
+            // Now we have the host state, start the signal monitors
+            if (!error_monitors::startMonitors(io, conn))
+            {
+                throw std::runtime_error("Failed to start signal monitors");
             }
         },
         "xyz.openbmc_project.State.Host", "/xyz/openbmc_project/state/host0",
@@ -328,6 +336,7 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
             {
                 // Handle any initial errors when the host turns on
                 initializeErrorState();
+                error_monitors::sendHostOn();
             }
         });
 }
@@ -1594,9 +1603,6 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    // Initialize the host state
-    host_error_monitor::initializeHostState();
-
     // Request CPU_CATERR GPIO events
     if (!host_error_monitor::requestGPIOEvents(
             "CPU_CATERR", host_error_monitor::caterrHandler,
@@ -1749,6 +1755,9 @@ int main(int argc, char* argv[])
     {
         return -1;
     }
+
+    // Initialize the signal monitors
+    host_error_monitor::init();
 
     host_error_monitor::io.run();
 
