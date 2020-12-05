@@ -19,6 +19,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <error_monitors.hpp>
 #include <gpiod.hpp>
 #include <host_error_monitor.hpp>
 #include <sdbusplus/asio/object_server.hpp>
@@ -328,6 +329,7 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
             {
                 // Handle any initial errors when the host turns on
                 initializeErrorState();
+                error_monitors::sendHostOn();
             }
         });
 }
@@ -1746,6 +1748,12 @@ int main(int argc, char* argv[])
             "CPU2_MEM_THERM_EVENT", host_error_monitor::cpu2MemtripHandler,
             host_error_monitor::cpu2MemtripLine,
             host_error_monitor::cpu2MemtripEvent))
+    {
+        return -1;
+    }
+
+    if (!host_error_monitor::error_monitors::startMonitors(
+            host_error_monitor::io, host_error_monitor::conn))
     {
         return -1;
     }
