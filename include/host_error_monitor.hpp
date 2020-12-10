@@ -20,6 +20,8 @@
 
 namespace host_error_monitor
 {
+using Association = std::tuple<std::string, std::string, std::string>;
+
 bool hostIsOff();
 
 void startPowerCycle(std::shared_ptr<sdbusplus::asio::connection> conn)
