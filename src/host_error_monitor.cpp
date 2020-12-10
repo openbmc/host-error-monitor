@@ -32,11 +32,8 @@ namespace host_error_monitor
 {
 static boost::asio::io_service io;
 static std::shared_ptr<sdbusplus::asio::connection> conn;
-static std::shared_ptr<sdbusplus::asio::dbus_interface> hostErrorTimeoutIface;
 
-using Association = std::tuple<std::string, std::string, std::string>;
 static std::shared_ptr<sdbusplus::asio::dbus_interface> associationSSBThermTrip;
-static std::shared_ptr<sdbusplus::asio::dbus_interface> associationCATAssert;
 
 static const constexpr char* rootPath = "/xyz/openbmc_project/CallbackManager";
 
@@ -46,16 +43,7 @@ bool hostIsOff()
     return hostOff;
 }
 
-static size_t caterrTimeoutMs = 2000;
-const static constexpr size_t caterrTimeoutMsMax = 600000; // 10 minutes maximum
-
-// Timers
-// Timer for CATERR asserted
-static boost::asio::steady_timer caterrAssertTimer(io);
-
 // GPIO Lines and Event Descriptors
-static gpiod::line caterrLine;
-static boost::asio::posix::stream_descriptor caterrEvent(io);
 static gpiod::line cpu1FIVRFaultLine;
 static gpiod::line cpu1ThermtripLine;
 static boost::asio::posix::stream_descriptor cpu1ThermtripEvent(io);
@@ -86,34 +74,6 @@ static gpiod::line cpu1MemtripLine;
 static boost::asio::posix::stream_descriptor cpu1MemtripEvent(io);
 static gpiod::line cpu2MemtripLine;
 static boost::asio::posix::stream_descriptor cpu2MemtripEvent(io);
-
-// beep function for CPU error
-const static constexpr uint8_t beepCPUIERR = 4;
-
-static void cpuIERRLog()
-{
-    sd_journal_send("MESSAGE=HostError: IERR", "PRIORITY=%i", LOG_INFO,
-                    "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
-                    "REDFISH_MESSAGE_ARGS=%s", "IERR", NULL);
-}
-
-static void cpuIERRLog(const int cpuNum)
-{
-    std::string msg = "IERR on CPU " + std::to_string(cpuNum + 1);
-
-    sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                    LOG_INFO, "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
-                    "REDFISH_MESSAGE_ARGS=%s", msg.c_str(), NULL);
-}
-
-static void cpuIERRLog(const int cpuNum, const std::string& type)
-{
-    std::string msg = type + " IERR on CPU " + std::to_string(cpuNum + 1);
-
-    sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                    LOG_INFO, "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
-                    "REDFISH_MESSAGE_ARGS=%s", msg.c_str(), NULL);
-}
 
 static void cpuBootFIVRFaultLog(const int cpuNum)
 {
@@ -225,13 +185,7 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
 
             hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
 
-            if (hostOff)
-            {
-                // No host events should fire while off, so cancel any pending
-                // timers
-                caterrAssertTimer.cancel();
-            }
-            else
+            if (!hostOff)
             {
                 // Handle any initial errors when the host turns on
                 initializeErrorState();
@@ -309,353 +263,6 @@ static bool requestGPIOInput(const std::string& name, gpiod::line& gpioLine)
     }
 
     return true;
-}
-
-static void incrementCPUErrorCount(int cpuNum)
-{
-    std::string propertyName = "ErrorCountCPU" + std::to_string(cpuNum + 1);
-
-    // Get the current count
-    conn->async_method_call(
-        [propertyName](boost::system::error_code ec,
-                       const std::variant<uint8_t>& property) {
-            if (ec)
-            {
-                std::cerr << "Failed to read " << propertyName << ": "
-                          << ec.message() << "\n";
-                return;
-            }
-            const uint8_t* errorCountVariant = std::get_if<uint8_t>(&property);
-            if (errorCountVariant == nullptr)
-            {
-                std::cerr << propertyName << " invalid\n";
-                return;
-            }
-            uint8_t errorCount = *errorCountVariant;
-            if (errorCount == std::numeric_limits<uint8_t>::max())
-            {
-                std::cerr << "Maximum error count reached\n";
-                return;
-            }
-            // Increment the count
-            errorCount++;
-            conn->async_method_call(
-                [propertyName](boost::system::error_code ec) {
-                    if (ec)
-                    {
-                        std::cerr << "Failed to set " << propertyName << ": "
-                                  << ec.message() << "\n";
-                    }
-                },
-                "xyz.openbmc_project.Settings",
-                "/xyz/openbmc_project/control/processor_error_config",
-                "org.freedesktop.DBus.Properties", "Set",
-                "xyz.openbmc_project.Control.Processor.ErrConfig", propertyName,
-                std::variant<uint8_t>{errorCount});
-        },
-        "xyz.openbmc_project.Settings",
-        "/xyz/openbmc_project/control/processor_error_config",
-        "org.freedesktop.DBus.Properties", "Get",
-        "xyz.openbmc_project.Control.Processor.ErrConfig", propertyName);
-}
-
-static bool checkIERRCPUs()
-{
-    bool cpuIERRFound = false;
-    for (size_t cpu = 0, addr = MIN_CLIENT_ADDR; addr <= MAX_CLIENT_ADDR;
-         cpu++, addr++)
-    {
-        EPECIStatus peciStatus = PECI_CC_SUCCESS;
-        uint8_t cc = 0;
-        CPUModel model{};
-        uint8_t stepping = 0;
-        if (peci_GetCPUID(addr, &model, &stepping, &cc) != PECI_CC_SUCCESS)
-        {
-            std::cerr << "Cannot get CPUID!\n";
-            continue;
-        }
-
-        switch (model)
-        {
-            case skx:
-            {
-                // First check the MCA_ERR_SRC_LOG to see if this is the CPU
-                // that caused the IERR
-                uint32_t mcaErrSrcLog = 0;
-                peciStatus = peci_RdPkgConfig(addr, 0, 5, 4,
-                                              (uint8_t*)&mcaErrSrcLog, &cc);
-                if (peciError(peciStatus, cc))
-                {
-                    printPECIError("MCA_ERR_SRC_LOG", addr, peciStatus, cc);
-                    continue;
-                }
-                // Check MSMI_INTERNAL (20) and IERR_INTERNAL (27)
-                if ((mcaErrSrcLog & (1 << 20)) || (mcaErrSrcLog & (1 << 27)))
-                {
-                    // TODO: Light the CPU fault LED?
-                    cpuIERRFound = true;
-                    incrementCPUErrorCount(cpu);
-                    // Next check if it's a CPU/VR mismatch by reading the
-                    // IA32_MC4_STATUS MSR (0x411)
-                    uint64_t mc4Status = 0;
-                    peciStatus = peci_RdIAMSR(addr, 0, 0x411, &mc4Status, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("IA32_MC4_STATUS", addr, peciStatus, cc);
-                        continue;
-                    }
-                    // Check MSEC bits 31:24 for
-                    // MCA_SVID_VCCIN_VR_ICC_MAX_FAILURE (0x40),
-                    // MCA_SVID_VCCIN_VR_VOUT_FAILURE (0x42), or
-                    // MCA_SVID_CPU_VR_CAPABILITY_ERROR (0x43)
-                    uint64_t msec = (mc4Status >> 24) & 0xFF;
-                    if (msec == 0x40 || msec == 0x42 || msec == 0x43)
-                    {
-                        cpuIERRLog(cpu, "CPU/VR Mismatch");
-                        continue;
-                    }
-
-                    // Next check if it's a Core FIVR fault by looking for a
-                    // non-zero value of CORE_FIVR_ERR_LOG (B(1) D30 F2 offset
-                    // 80h)
-                    uint32_t coreFIVRErrLog = 0;
-                    peciStatus = peci_RdPCIConfigLocal(
-                        addr, 1, 30, 2, 0x80, sizeof(uint32_t),
-                        (uint8_t*)&coreFIVRErrLog, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("CORE_FIVR_ERR_LOG", addr, peciStatus,
-                                       cc);
-                        continue;
-                    }
-                    if (coreFIVRErrLog)
-                    {
-                        cpuIERRLog(cpu, "Core FIVR Fault");
-                        continue;
-                    }
-
-                    // Next check if it's an Uncore FIVR fault by looking for a
-                    // non-zero value of UNCORE_FIVR_ERR_LOG (B(1) D30 F2 offset
-                    // 84h)
-                    uint32_t uncoreFIVRErrLog = 0;
-                    peciStatus = peci_RdPCIConfigLocal(
-                        addr, 1, 30, 2, 0x84, sizeof(uint32_t),
-                        (uint8_t*)&uncoreFIVRErrLog, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("UNCORE_FIVR_ERR_LOG", addr, peciStatus,
-                                       cc);
-                        continue;
-                    }
-                    if (uncoreFIVRErrLog)
-                    {
-                        cpuIERRLog(cpu, "Uncore FIVR Fault");
-                        continue;
-                    }
-
-                    // Last if CORE_FIVR_ERR_LOG and UNCORE_FIVR_ERR_LOG are
-                    // both zero, but MSEC bits 31:24 have either
-                    // MCA_FIVR_CATAS_OVERVOL_FAULT (0x51) or
-                    // MCA_FIVR_CATAS_OVERCUR_FAULT (0x52), then log it as an
-                    // uncore FIVR fault
-                    if (!coreFIVRErrLog && !uncoreFIVRErrLog &&
-                        (msec == 0x51 || msec == 0x52))
-                    {
-                        cpuIERRLog(cpu, "Uncore FIVR Fault");
-                        continue;
-                    }
-                    cpuIERRLog(cpu);
-                }
-                break;
-            }
-            case icx:
-            {
-                // First check the MCA_ERR_SRC_LOG to see if this is the CPU
-                // that caused the IERR
-                uint32_t mcaErrSrcLog = 0;
-                peciStatus = peci_RdPkgConfig(addr, 0, 5, 4,
-                                              (uint8_t*)&mcaErrSrcLog, &cc);
-                if (peciError(peciStatus, cc))
-                {
-                    printPECIError("MCA_ERR_SRC_LOG", addr, peciStatus, cc);
-                    continue;
-                }
-                // Check MSMI_INTERNAL (20) and IERR_INTERNAL (27)
-                if ((mcaErrSrcLog & (1 << 20)) || (mcaErrSrcLog & (1 << 27)))
-                {
-                    // TODO: Light the CPU fault LED?
-                    cpuIERRFound = true;
-                    incrementCPUErrorCount(cpu);
-                    // Next check if it's a CPU/VR mismatch by reading the
-                    // IA32_MC4_STATUS MSR (0x411)
-                    uint64_t mc4Status = 0;
-                    peciStatus = peci_RdIAMSR(addr, 0, 0x411, &mc4Status, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("IA32_MC4_STATUS", addr, peciStatus, cc);
-                        continue;
-                    }
-                    // Check MSEC bits 31:24 for
-                    // MCA_SVID_VCCIN_VR_ICC_MAX_FAILURE (0x40),
-                    // MCA_SVID_VCCIN_VR_VOUT_FAILURE (0x42), or
-                    // MCA_SVID_CPU_VR_CAPABILITY_ERROR (0x43)
-                    uint64_t msec = (mc4Status >> 24) & 0xFF;
-                    if (msec == 0x40 || msec == 0x42 || msec == 0x43)
-                    {
-                        cpuIERRLog(cpu, "CPU/VR Mismatch");
-                        continue;
-                    }
-
-                    // Next check if it's a Core FIVR fault by looking for a
-                    // non-zero value of CORE_FIVR_ERR_LOG (B(31) D30 F2 offsets
-                    // C0h and C4h) (Note: Bus 31 is accessed on PECI as bus 14)
-                    uint32_t coreFIVRErrLog0 = 0;
-                    uint32_t coreFIVRErrLog1 = 0;
-                    peciStatus = peci_RdEndPointConfigPciLocal(
-                        addr, 0, 14, 30, 2, 0xC0, sizeof(uint32_t),
-                        (uint8_t*)&coreFIVRErrLog0, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("CORE_FIVR_ERR_LOG_0", addr, peciStatus,
-                                       cc);
-                        continue;
-                    }
-                    peciStatus = peci_RdEndPointConfigPciLocal(
-                        addr, 0, 14, 30, 2, 0xC4, sizeof(uint32_t),
-                        (uint8_t*)&coreFIVRErrLog1, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("CORE_FIVR_ERR_LOG_1", addr, peciStatus,
-                                       cc);
-                        continue;
-                    }
-                    if (coreFIVRErrLog0 || coreFIVRErrLog1)
-                    {
-                        cpuIERRLog(cpu, "Core FIVR Fault");
-                        continue;
-                    }
-
-                    // Next check if it's an Uncore FIVR fault by looking for a
-                    // non-zero value of UNCORE_FIVR_ERR_LOG (B(31) D30 F2
-                    // offset 84h) (Note: Bus 31 is accessed on PECI as bus 14)
-                    uint32_t uncoreFIVRErrLog = 0;
-                    peciStatus = peci_RdEndPointConfigPciLocal(
-                        addr, 0, 14, 30, 2, 0x84, sizeof(uint32_t),
-                        (uint8_t*)&uncoreFIVRErrLog, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("UNCORE_FIVR_ERR_LOG", addr, peciStatus,
-                                       cc);
-                        continue;
-                    }
-                    if (uncoreFIVRErrLog)
-                    {
-                        cpuIERRLog(cpu, "Uncore FIVR Fault");
-                        continue;
-                    }
-
-                    // TODO: Update MSEC/MSCOD_31_24 check
-                    // Last if CORE_FIVR_ERR_LOG and UNCORE_FIVR_ERR_LOG are
-                    // both zero, but MSEC bits 31:24 have either
-                    // MCA_FIVR_CATAS_OVERVOL_FAULT (0x51) or
-                    // MCA_FIVR_CATAS_OVERCUR_FAULT (0x52), then log it as an
-                    // uncore FIVR fault
-                    if (!coreFIVRErrLog0 && !coreFIVRErrLog1 &&
-                        !uncoreFIVRErrLog && (msec == 0x51 || msec == 0x52))
-                    {
-                        cpuIERRLog(cpu, "Uncore FIVR Fault");
-                        continue;
-                    }
-                    cpuIERRLog(cpu);
-                }
-                break;
-            }
-        }
-    }
-    return cpuIERRFound;
-}
-
-static void caterrAssertHandler()
-{
-    caterrAssertTimer.expires_after(std::chrono::milliseconds(caterrTimeoutMs));
-    caterrAssertTimer.async_wait([](const boost::system::error_code ec) {
-        if (ec)
-        {
-            // operation_aborted is expected if timer is canceled
-            // before completion.
-            if (ec != boost::asio::error::operation_aborted)
-            {
-                std::cerr << "caterr timeout async_wait failed: "
-                          << ec.message() << "\n";
-            }
-            return;
-        }
-        std::cerr << "CATERR asserted for " << std::to_string(caterrTimeoutMs)
-                  << " ms\n";
-        beep(conn, beepCPUIERR);
-        if (!checkIERRCPUs())
-        {
-            cpuIERRLog();
-        }
-        conn->async_method_call(
-            [](boost::system::error_code ec,
-               const std::variant<bool>& property) {
-                if (ec)
-                {
-                    return;
-                }
-                const bool* reset = std::get_if<bool>(&property);
-                if (reset == nullptr)
-                {
-                    std::cerr << "Unable to read reset on CATERR value\n";
-                    return;
-                }
-                startCrashdumpAndRecovery(conn, *reset, "IERR");
-            },
-            "xyz.openbmc_project.Settings",
-            "/xyz/openbmc_project/control/processor_error_config",
-            "org.freedesktop.DBus.Properties", "Get",
-            "xyz.openbmc_project.Control.Processor.ErrConfig", "ResetOnCATERR");
-    });
-}
-
-static void caterrHandler()
-{
-    if (!hostOff)
-    {
-        gpiod::line_event gpioLineEvent = caterrLine.event_read();
-
-        bool caterr =
-            gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-
-        std::vector<Association> associations;
-        if (caterr)
-        {
-            caterrAssertHandler();
-            associations.emplace_back(
-                "", "critical",
-                "/xyz/openbmc_project/host_error_monitor/cat_error");
-            associations.emplace_back("", "critical",
-                                      host_error_monitor::rootPath);
-        }
-        else
-        {
-            caterrAssertTimer.cancel();
-            associations.emplace_back("", "", "");
-        }
-        host_error_monitor::associationCATAssert->set_property("Associations",
-                                                               associations);
-    }
-    caterrEvent.async_wait(boost::asio::posix::stream_descriptor::wait_read,
-                           [](const boost::system::error_code ec) {
-                               if (ec)
-                               {
-                                   std::cerr << "caterr handler error: "
-                                             << ec.message() << "\n";
-                                   return;
-                               }
-                               caterrHandler();
-                           });
 }
 
 static void cpu1ThermtripAssertHandler()
@@ -988,18 +595,6 @@ static void pchThermtripHandler()
 
 static void initializeErrorState()
 {
-    // Handle CPU_CATERR if it's asserted now
-    if (caterrLine.get_value() == 0)
-    {
-        caterrAssertHandler();
-        std::vector<Association> associations;
-        associations.emplace_back(
-            "", "critical", "/xyz/openbmc_project/host_error_monitor/cat_err");
-        associations.emplace_back("", "critical", host_error_monitor::rootPath);
-        host_error_monitor::associationCATAssert->set_property("Associations",
-                                                               associations);
-    }
-
     // Handle CPU1_THERMTRIP if it's asserted now
     if (cpu1ThermtripLine.get_value() == 0)
     {
@@ -1097,50 +692,12 @@ int main(int argc, char* argv[])
         "Associations", associations);
     host_error_monitor::associationSSBThermTrip->initialize();
 
-    host_error_monitor::associationCATAssert = server.add_interface(
-        "/xyz/openbmc_project/host_error_monitor/cat_assert",
-        "xyz.openbmc_project.Association.Definitions");
-    host_error_monitor::associationCATAssert->register_property("Associations",
-                                                                associations);
-    host_error_monitor::associationCATAssert->initialize();
-
-    // Restart Cause Interface
-    host_error_monitor::hostErrorTimeoutIface =
-        server.add_interface("/xyz/openbmc_project/host_error_monitor",
-                             "xyz.openbmc_project.HostErrorMonitor.Timeout");
-
-    host_error_monitor::hostErrorTimeoutIface->register_property(
-        "IERRTimeoutMs", host_error_monitor::caterrTimeoutMs,
-        [](const std::size_t& requested, std::size_t& resp) {
-            if (requested > host_error_monitor::caterrTimeoutMsMax)
-            {
-                std::cerr << "IERRTimeoutMs update to " << requested
-                          << "ms rejected. Cannot be greater than "
-                          << host_error_monitor::caterrTimeoutMsMax << "ms.\n";
-                return 0;
-            }
-            std::cerr << "IERRTimeoutMs updated to " << requested << "ms\n";
-            host_error_monitor::caterrTimeoutMs = requested;
-            resp = requested;
-            return 1;
-        },
-        [](std::size_t& resp) { return host_error_monitor::caterrTimeoutMs; });
-    host_error_monitor::hostErrorTimeoutIface->initialize();
-
     // Start tracking host state
     std::shared_ptr<sdbusplus::bus::match::match> hostStateMonitor =
         host_error_monitor::startHostStateMonitor();
 
     // Initialize the host state
     host_error_monitor::initializeHostState();
-
-    // Request CPU_CATERR GPIO events
-    if (!host_error_monitor::requestGPIOEvents(
-            "CPU_CATERR", host_error_monitor::caterrHandler,
-            host_error_monitor::caterrLine, host_error_monitor::caterrEvent))
-    {
-        return -1;
-    }
 
     // Request CPU1_FIVR_FAULT GPIO input
     if (!host_error_monitor::requestGPIOInput(
