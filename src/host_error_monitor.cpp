@@ -44,12 +44,6 @@ bool hostIsOff()
 }
 
 // GPIO Lines and Event Descriptors
-static gpiod::line cpu1FIVRFaultLine;
-static gpiod::line cpu1ThermtripLine;
-static boost::asio::posix::stream_descriptor cpu1ThermtripEvent(io);
-static gpiod::line cpu2FIVRFaultLine;
-static gpiod::line cpu2ThermtripLine;
-static boost::asio::posix::stream_descriptor cpu2ThermtripEvent(io);
 static gpiod::line cpu1VRHotLine;
 static boost::asio::posix::stream_descriptor cpu1VRHotEvent(io);
 static gpiod::line cpu2VRHotLine;
@@ -74,25 +68,6 @@ static gpiod::line cpu1MemtripLine;
 static boost::asio::posix::stream_descriptor cpu1MemtripEvent(io);
 static gpiod::line cpu2MemtripLine;
 static boost::asio::posix::stream_descriptor cpu2MemtripEvent(io);
-
-static void cpuBootFIVRFaultLog(const int cpuNum)
-{
-    std::string msg = "Boot FIVR Fault on CPU " + std::to_string(cpuNum);
-
-    sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                    LOG_INFO, "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.CPUError",
-                    "REDFISH_MESSAGE_ARGS=%s", msg.c_str(), NULL);
-}
-
-static void cpuThermTripLog(const int cpuNum)
-{
-    std::string msg = "CPU " + std::to_string(cpuNum) + " thermal trip";
-
-    sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                    LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                    "OpenBMC.0.1.CPUThermalTrip", "REDFISH_MESSAGE_ARGS=%d",
-                    cpuNum, NULL);
-}
 
 static void memThermTripLog(const int cpuNum)
 {
@@ -265,42 +240,6 @@ static bool requestGPIOInput(const std::string& name, gpiod::line& gpioLine)
     return true;
 }
 
-static void cpu1ThermtripAssertHandler()
-{
-    if (cpu1FIVRFaultLine.get_value() == 0)
-    {
-        cpuBootFIVRFaultLog(1);
-    }
-    else
-    {
-        cpuThermTripLog(1);
-    }
-}
-
-static void cpu1ThermtripHandler()
-{
-    gpiod::line_event gpioLineEvent = cpu1ThermtripLine.event_read();
-
-    bool cpu1Thermtrip =
-        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-    if (cpu1Thermtrip)
-    {
-        cpu1ThermtripAssertHandler();
-    }
-
-    cpu1ThermtripEvent.async_wait(
-        boost::asio::posix::stream_descriptor::wait_read,
-        [](const boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "CPU 1 Thermtrip handler error: " << ec.message()
-                          << "\n";
-                return;
-            }
-            cpu1ThermtripHandler();
-        });
-}
-
 static void cpu1MemtripHandler()
 {
     gpiod::line_event gpioLineEvent = cpu1MemtripLine.event_read();
@@ -322,42 +261,6 @@ static void cpu1MemtripHandler()
                 return;
             }
             cpu1MemtripHandler();
-        });
-}
-
-static void cpu2ThermtripAssertHandler()
-{
-    if (cpu2FIVRFaultLine.get_value() == 0)
-    {
-        cpuBootFIVRFaultLog(2);
-    }
-    else
-    {
-        cpuThermTripLog(2);
-    }
-}
-
-static void cpu2ThermtripHandler()
-{
-    gpiod::line_event gpioLineEvent = cpu2ThermtripLine.event_read();
-
-    bool cpu2Thermtrip =
-        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-    if (cpu2Thermtrip)
-    {
-        cpu2ThermtripAssertHandler();
-    }
-
-    cpu2ThermtripEvent.async_wait(
-        boost::asio::posix::stream_descriptor::wait_read,
-        [](const boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "CPU 2 Thermtrip handler error: " << ec.message()
-                          << "\n";
-                return;
-            }
-            cpu2ThermtripHandler();
         });
 }
 
@@ -595,18 +498,6 @@ static void pchThermtripHandler()
 
 static void initializeErrorState()
 {
-    // Handle CPU1_THERMTRIP if it's asserted now
-    if (cpu1ThermtripLine.get_value() == 0)
-    {
-        cpu1ThermtripAssertHandler();
-    }
-
-    // Handle CPU2_THERMTRIP if it's asserted now
-    if (cpu2ThermtripLine.get_value() == 0)
-    {
-        cpu2ThermtripAssertHandler();
-    }
-
     // Handle CPU1_MEM_THERM_EVENT (CPU1 DIMM Thermal trip) if it's asserted now
     if (cpu1MemtripLine.get_value() == 0)
     {
@@ -698,38 +589,6 @@ int main(int argc, char* argv[])
 
     // Initialize the host state
     host_error_monitor::initializeHostState();
-
-    // Request CPU1_FIVR_FAULT GPIO input
-    if (!host_error_monitor::requestGPIOInput(
-            "CPU1_FIVR_FAULT", host_error_monitor::cpu1FIVRFaultLine))
-    {
-        return -1;
-    }
-
-    // Request CPU1_THERMTRIP GPIO events
-    if (!host_error_monitor::requestGPIOEvents(
-            "CPU1_THERMTRIP", host_error_monitor::cpu1ThermtripHandler,
-            host_error_monitor::cpu1ThermtripLine,
-            host_error_monitor::cpu1ThermtripEvent))
-    {
-        return -1;
-    }
-
-    // Request CPU2_FIVR_FAULT GPIO input
-    if (!host_error_monitor::requestGPIOInput(
-            "CPU2_FIVR_FAULT", host_error_monitor::cpu2FIVRFaultLine))
-    {
-        return -1;
-    }
-
-    // Request CPU2_THERMTRIP GPIO events
-    if (!host_error_monitor::requestGPIOEvents(
-            "CPU2_THERMTRIP", host_error_monitor::cpu2ThermtripHandler,
-            host_error_monitor::cpu2ThermtripLine,
-            host_error_monitor::cpu2ThermtripEvent))
-    {
-        return -1;
-    }
 
     // Request CPU1_VRHOT GPIO events
     if (!host_error_monitor::requestGPIOEvents(
