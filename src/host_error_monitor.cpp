@@ -33,28 +33,10 @@ namespace host_error_monitor
 static boost::asio::io_service io;
 static std::shared_ptr<sdbusplus::asio::connection> conn;
 
-static std::shared_ptr<sdbusplus::asio::dbus_interface> associationSSBThermTrip;
-
-static const constexpr char* rootPath = "/xyz/openbmc_project/CallbackManager";
-
 static bool hostOff = true;
 bool hostIsOff()
 {
     return hostOff;
-}
-
-// GPIO Lines and Event Descriptors
-//----------------------------------
-// PCH_BMC_THERMTRIP function related definition
-//----------------------------------
-static gpiod::line pchThermtripLine;
-static boost::asio::posix::stream_descriptor pchThermtripEvent(io);
-
-static void ssbThermTripLog()
-{
-    sd_journal_send("MESSAGE=HostError: SSB thermal trip", "PRIORITY=%i",
-                    LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                    "OpenBMC.0.1.SsbThermalTrip", NULL);
 }
 
 static void initializeErrorState();
@@ -207,57 +189,8 @@ static bool requestGPIOInput(const std::string& name, gpiod::line& gpioLine)
     return true;
 }
 
-static void pchThermtripHandler()
-{
-    std::vector<Association> associations;
-
-    gpiod::line_event gpioLineEvent = pchThermtripLine.event_read();
-
-    bool pchThermtrip =
-        gpioLineEvent.event_type == gpiod::line_event::FALLING_EDGE;
-    if (pchThermtrip)
-    {
-        ssbThermTripLog();
-        associations.emplace_back(
-            "", "critical",
-            "/xyz/openbmc_project/host_error_monitor/ssb_thermal_trip");
-        associations.emplace_back("", "critical", host_error_monitor::rootPath);
-    }
-    else
-    {
-        associations.emplace_back("", "", "");
-    }
-    host_error_monitor::associationSSBThermTrip->set_property("Associations",
-                                                              associations);
-
-    pchThermtripEvent.async_wait(
-        boost::asio::posix::stream_descriptor::wait_read,
-        [](const boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "PCH Thermal trip handler error: " << ec.message()
-                          << "\n";
-                return;
-            }
-            pchThermtripHandler();
-        });
-}
-
 static void initializeErrorState()
-{
-    // Handle PCH_BMC_THERMTRIP if it's asserted now
-    if (pchThermtripLine.get_value() == 0)
-    {
-        ssbThermTripLog();
-        std::vector<Association> associations;
-        associations.emplace_back(
-            "", "critical",
-            "/xyz/openbmc_project/host_error_monitor/ssb_thermal_trip");
-        associations.emplace_back("", "critical", host_error_monitor::rootPath);
-        host_error_monitor::associationSSBThermTrip->set_property(
-            "Associations", associations);
-    }
-}
+{}
 } // namespace host_error_monitor
 
 int main(int argc, char* argv[])
@@ -272,28 +205,9 @@ int main(int argc, char* argv[])
     sdbusplus::asio::object_server server =
         sdbusplus::asio::object_server(host_error_monitor::conn);
 
-    // Associations interface for led status
-    std::vector<host_error_monitor::Association> associations;
-    associations.emplace_back("", "", "");
-    host_error_monitor::associationSSBThermTrip = server.add_interface(
-        "/xyz/openbmc_project/host_error_monitor/ssb_thermal_trip",
-        "xyz.openbmc_project.Association.Definitions");
-    host_error_monitor::associationSSBThermTrip->register_property(
-        "Associations", associations);
-    host_error_monitor::associationSSBThermTrip->initialize();
-
     // Start tracking host state
     std::shared_ptr<sdbusplus::bus::match::match> hostStateMonitor =
         host_error_monitor::startHostStateMonitor();
-
-    // Request PCH_BMC_THERMTRIP GPIO events
-    if (!host_error_monitor::requestGPIOEvents(
-            "PCH_BMC_THERMTRIP", host_error_monitor::pchThermtripHandler,
-            host_error_monitor::pchThermtripLine,
-            host_error_monitor::pchThermtripEvent))
-    {
-        return -1;
-    }
 
     // Initialize the signal monitors
     host_error_monitor::init();
