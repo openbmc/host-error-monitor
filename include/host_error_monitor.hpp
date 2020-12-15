@@ -14,6 +14,8 @@
 // limitations under the License.
 */
 #pragma once
+#include <peci.h>
+
 #include <sdbusplus/asio/object_server.hpp>
 
 #include <iostream>
