@@ -13,18 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
-#include <peci.h>
-#include <systemd/sd-journal.h>
-
 #include <boost/asio/io_service.hpp>
-#include <boost/asio/posix/stream_descriptor.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <error_monitors.hpp>
-#include <gpiod.hpp>
 #include <host_error_monitor.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 
-#include <bitset>
 #include <iostream>
 #include <variant>
 
@@ -39,7 +32,6 @@ bool hostIsOff()
     return hostOff;
 }
 
-static void initializeErrorState();
 static void init()
 {
     // Get the current host state to prepare to start the signal monitors
@@ -57,11 +49,6 @@ static void init()
                 return;
             }
             hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
-            // If the system is on, initialize the error state
-            if (!hostOff)
-            {
-                initializeErrorState();
-            }
 
             // Now we have the host state, start the signal monitors
             if (!error_monitors::startMonitors(io, conn))
@@ -111,86 +98,11 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
 
             if (!hostOff)
             {
-                // Handle any initial errors when the host turns on
-                initializeErrorState();
+                // Notify error monitors when the host turns on
                 error_monitors::sendHostOn();
             }
         });
 }
-
-static bool requestGPIOEvents(
-    const std::string& name, const std::function<void()>& handler,
-    gpiod::line& gpioLine,
-    boost::asio::posix::stream_descriptor& gpioEventDescriptor)
-{
-    // Find the GPIO line
-    gpioLine = gpiod::find_line(name);
-    if (!gpioLine)
-    {
-        std::cerr << "Failed to find the " << name << " line\n";
-        return false;
-    }
-
-    try
-    {
-        gpioLine.request(
-            {"host-error-monitor", gpiod::line_request::EVENT_BOTH_EDGES});
-    }
-    catch (std::exception&)
-    {
-        std::cerr << "Failed to request events for " << name << "\n";
-        return false;
-    }
-
-    int gpioLineFd = gpioLine.event_get_fd();
-    if (gpioLineFd < 0)
-    {
-        std::cerr << "Failed to get " << name << " fd\n";
-        return false;
-    }
-
-    gpioEventDescriptor.assign(gpioLineFd);
-
-    gpioEventDescriptor.async_wait(
-        boost::asio::posix::stream_descriptor::wait_read,
-        [&name, handler](const boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << name << " fd handler error: " << ec.message()
-                          << "\n";
-                return;
-            }
-            handler();
-        });
-    return true;
-}
-
-static bool requestGPIOInput(const std::string& name, gpiod::line& gpioLine)
-{
-    // Find the GPIO line
-    gpioLine = gpiod::find_line(name);
-    if (!gpioLine)
-    {
-        std::cerr << "Failed to find the " << name << " line.\n";
-        return false;
-    }
-
-    // Request GPIO input
-    try
-    {
-        gpioLine.request({__FUNCTION__, gpiod::line_request::DIRECTION_INPUT});
-    }
-    catch (std::exception&)
-    {
-        std::cerr << "Failed to request " << name << " input\n";
-        return false;
-    }
-
-    return true;
-}
-
-static void initializeErrorState()
-{}
 } // namespace host_error_monitor
 
 int main(int argc, char* argv[])
