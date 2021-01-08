@@ -34,24 +34,29 @@ bool hostIsOff()
 
 static void initializeHostState()
 {
-    conn->async_method_call(
-        [](boost::system::error_code ec,
-           const std::variant<std::string>& property) {
-            if (ec)
-            {
-                return;
-            }
-            const std::string* state = std::get_if<std::string>(&property);
-            if (state == nullptr)
-            {
-                std::cerr << "Unable to read host state value\n";
-                return;
-            }
-            hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
-        },
+    sdbusplus::message::message getHostState = conn->new_method_call(
         "xyz.openbmc_project.State.Host", "/xyz/openbmc_project/state/host0",
-        "org.freedesktop.DBus.Properties", "Get",
-        "xyz.openbmc_project.State.Host", "CurrentHostState");
+        "org.freedesktop.DBus.Properties", "Get");
+    getHostState.append("xyz.openbmc_project.State.Host", "CurrentHostState");
+    std::variant<std::string> property;
+    try
+    {
+        sdbusplus::message::message getHostStateResp = conn->call(getHostState);
+        getHostStateResp.read(property);
+    }
+    catch (sdbusplus::exception_t&)
+    {
+        std::cerr << "error getting host state value\n";
+        return;
+    }
+
+    const std::string* state = std::get_if<std::string>(&property);
+    if (state == nullptr)
+    {
+        std::cerr << "Unable to read host state value\n";
+        return;
+    }
+    hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
 }
 
 static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
