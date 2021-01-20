@@ -53,8 +53,10 @@ add_definitions (-DBOOST_NO_RTTI)
 add_definitions (-DBOOST_NO_TYPEID)
 add_definitions (-DBOOST_ASIO_DISABLE_THREADS)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-rtti")
+# Temporarily disable rtti
+# See https://github.com/chriskohlhoff/asio/issues/533
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-rtti")
 
 set (
     SERVICE_FILES
