@@ -16,6 +16,29 @@
       "revId": "2b23292fdcfd4582ec046cf0ab7818310fad15c2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c4aabec2_d6d5b62c",
+        "filename": "include/error_monitors/base_monitor.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-01-28T00:33:50Z",
+      "side": 1,
+      "message": "if isValid() is simply returning valid, it seems like a simple way to \u0027virtualize\u0027 the behavior is to simply have the child classes change the member variable rather than override the function.",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 26
+      },
+      "revId": "2b23292fdcfd4582ec046cf0ab7818310fad15c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
