@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dc8f6e05_8049d797",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-01-28T22:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "28147f5b_257bd1a8",
+      "revId": "2b23292fdcfd4582ec046cf0ab7818310fad15c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4aabec2_d6d5b62c",
         "filename": "include/error_monitors/base_monitor.hpp",
         "patchSetId": 2
@@ -39,6 +57,30 @@
       "revId": "2b23292fdcfd4582ec046cf0ab7818310fad15c2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "383ae81a_b16981c1",
+        "filename": "include/error_monitors/base_monitor.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-01-28T22:49:29Z",
+      "side": 1,
+      "message": "You\u0027re right.  This doesn\u0027t need to be virtual as it shouldn\u0027t need to be overridden.  I could probably do without the function and have the valid check directly look at the member variable, but keeping the function may be more flexible in the future?  I don\u0027t know the best approach here, so I\u0027m open to recommendations.",
+      "parentUuid": "c4aabec2_d6d5b62c",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 26
+      },
+      "revId": "2b23292fdcfd4582ec046cf0ab7818310fad15c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
