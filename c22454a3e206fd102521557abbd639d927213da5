@@ -22,6 +22,30 @@
       "revId": "c22454a3e206fd102521557abbd639d927213da5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95676692_59199b08",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-02-02T21:32:35Z",
+      "side": 1,
+      "message": "It was the SMI signal that was toggling too fast for our interrupts to keep up, but that exposed the flaw in depending solely on the interrupts to know the current pin state.  It could happen on any GPIO that toggles too quickly.",
+      "parentUuid": "debc29e6_41d095e5",
+      "range": {
+        "startLine": 12,
+        "startChar": 28,
+        "endLine": 13,
+        "endChar": 47
+      },
+      "revId": "c22454a3e206fd102521557abbd639d927213da5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
