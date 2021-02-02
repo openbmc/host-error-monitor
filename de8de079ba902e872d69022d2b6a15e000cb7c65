@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1c6bf2c9_54de3705",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-02T14:07:06Z",
+      "side": 1,
+      "message": "Just curious, in case if you know, how much binary size is getting incremented because of this. \n\nAlso, hope we have opened issue, to rollback this WA, once boost fixed the issue?",
+      "revId": "de8de079ba902e872d69022d2b6a15e000cb7c65",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
