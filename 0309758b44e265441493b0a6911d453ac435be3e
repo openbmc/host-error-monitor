@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e89757c4_7b3bd875",
+        "filename": "include/error_monitors/base_gpio_poll_monitor.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-02T17:26:36Z",
+      "side": 1,
+      "message": "This may make to miss some events, if timing is configured wrongly.\ni.e. Say SMI timeout without reset (Then there is a chance that multiple SMI timeout can be generated, and if polling is greater than successive notification, then we may miss few events). \n\nNote: I have not yet reviewed further patches, but thought of making sure, that it is intended, and we make sure those kind of monitoring will have shorter timeout ?",
+      "revId": "0309758b44e265441493b0a6911d453ac435be3e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
