@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0141d974_3ab3e5a2",
+        "filename": "include/error_monitors/base_gpio_poll_monitor.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-02-02T21:49:05Z",
+      "side": 1,
+      "message": "Hmm... That is interesting.  I wonder if because this header isn\u0027t used anywhere in this commit  it\u0027s not being compiled.",
+      "parentUuid": "429e199e_522d5208",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 33
+      },
+      "revId": "0309758b44e265441493b0a6911d453ac435be3e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e89757c4_7b3bd875",
         "filename": "include/error_monitors/base_gpio_poll_monitor.hpp",
         "patchSetId": 3
@@ -36,6 +60,24 @@
       "writtenOn": "2021-02-02T17:26:36Z",
       "side": 1,
       "message": "This may make to miss some events, if timing is configured wrongly.\ni.e. Say SMI timeout without reset (Then there is a chance that multiple SMI timeout can be generated, and if polling is greater than successive notification, then we may miss few events). \n\nNote: I have not yet reviewed further patches, but thought of making sure, that it is intended, and we make sure those kind of monitoring will have shorter timeout ?",
+      "revId": "0309758b44e265441493b0a6911d453ac435be3e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0798eb85_46166867",
+        "filename": "include/error_monitors/base_gpio_poll_monitor.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-02-02T21:49:05Z",
+      "side": 1,
+      "message": "This is expected.  The timeout on the signal is long enough that missing events in the middle doesn\u0027t matter as long as it eventually ends up at the expected level.  For the SMI example, it has a 90 second timeout and we poll once per second to check the current level.",
+      "parentUuid": "e89757c4_7b3bd875",
       "revId": "0309758b44e265441493b0a6911d453ac435be3e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
