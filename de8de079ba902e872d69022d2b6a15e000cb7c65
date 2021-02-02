@@ -16,6 +16,24 @@
       "revId": "de8de079ba902e872d69022d2b6a15e000cb7c65",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b1ed2c9_a15148a1",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-02-02T21:30:44Z",
+      "side": 1,
+      "message": "I don\u0027t know the impact on the binary size.  Yes, this will be rolled back when we move to boost 1.75.  I was hoping that it would happen before I merge this change, but because of the build issues, it looks like it may not happen, so another patch will be added to roll this back.",
+      "parentUuid": "1c6bf2c9_54de3705",
+      "revId": "de8de079ba902e872d69022d2b6a15e000cb7c65",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
