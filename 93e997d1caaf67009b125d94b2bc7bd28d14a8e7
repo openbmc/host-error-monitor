@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9edd3b63_876b35ff",
+        "filename": "include/error_monitors/err2_monitor.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-12T15:27:14Z",
+      "side": 1,
+      "message": "nit: 2021",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "93e997d1caaf67009b125d94b2bc7bd28d14a8e7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48533a27_226cc258",
+        "filename": "include/error_monitors/err2_monitor.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-12T15:27:14Z",
+      "side": 1,
+      "message": "clarification: async model. There is a chance to trigger multiple Crashdump when the event happens immediately (esp. SMI Timeout?, if crash dump takes more time)",
+      "revId": "93e997d1caaf67009b125d94b2bc7bd28d14a8e7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
