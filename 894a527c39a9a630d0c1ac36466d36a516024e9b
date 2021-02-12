@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d439d4d0_471b6d99",
+        "filename": "include/error_monitors/vr_hot_monitor.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-12T15:29:12Z",
+      "side": 1,
+      "message": "2021",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "894a527c39a9a630d0c1ac36466d36a516024e9b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
