@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e160e3b0_5838cb88",
+        "filename": "include/error_monitors/cpu_thermtrip_monitor.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-12T15:28:33Z",
+      "side": 1,
+      "message": "nit: 2021",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "ba9b6183ad4d728763207bbf8ee27f8e1ddb5d3c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2ee3bb38_40d2540d",
+        "filename": "include/error_monitors/cpu_thermtrip_monitor.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-12T15:28:33Z",
+      "side": 1,
+      "message": "Why CPU Thermal trip and FIVR fault are tied together? Both are different right. If it is due to similar monitoring, can we update the class name?",
+      "range": {
+        "startLine": 44,
+        "startChar": 9,
+        "endLine": 44,
+        "endChar": 28
+      },
+      "revId": "ba9b6183ad4d728763207bbf8ee27f8e1ddb5d3c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
