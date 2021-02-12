@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba69fa38_abb96d89",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-12T15:33:47Z",
+      "side": 1,
+      "message": "this is going to cause problem, esp. ObjectMapper, will complain about introspect failure during AC cycle boot, as it won\u0027t get response, till the response for the initializeHostState is handled.\nBetter logic is do io post of this and below line, to give a chance to handle object mapper request.",
+      "revId": "e405f791376e7372f779a31d443cdb8ff6e49b3a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
