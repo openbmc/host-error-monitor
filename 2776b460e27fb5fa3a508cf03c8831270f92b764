@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fde5e316_cb68c6d8",
+        "filename": "include/error_monitors/base_gpio_poll_monitor.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-12T15:24:59Z",
+      "side": 1,
+      "message": "nit: 2021",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "2776b460e27fb5fa3a508cf03c8831270f92b764",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
