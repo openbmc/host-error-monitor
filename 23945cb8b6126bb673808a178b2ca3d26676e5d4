@@ -46,6 +46,30 @@
       "revId": "23945cb8b6126bb673808a178b2ca3d26676e5d4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ceb72c65_d0c1fa55",
+        "filename": "include/host_error_monitor.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-12T15:25:24Z",
+      "side": 1,
+      "message": "Clarification:\nIf crashdump daemon crashed and rebooted, it means, it won\u0027t further collect the information right? \n\ni.e. If user configured the system to reset after an error, what takes priority --\u003e Still hang, if unable to collect crash dump or after all retries, reboot the system and recover it? (I thought if we failed to collect, then we need to reboot the system after a prescribed time? so that Host operations can be continued.).",
+      "parentUuid": "898d89d8_ceb5035f",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 77,
+        "endChar": 11
+      },
+      "revId": "23945cb8b6126bb673808a178b2ca3d26676e5d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }

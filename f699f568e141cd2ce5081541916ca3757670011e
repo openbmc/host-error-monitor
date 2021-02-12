@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4e166d2_2f4471e5",
+        "filename": "include/host_error_monitor.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-12T15:25:24Z",
+      "side": 1,
+      "message": "nit: 2021",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "f699f568e141cd2ce5081541916ca3757670011e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
