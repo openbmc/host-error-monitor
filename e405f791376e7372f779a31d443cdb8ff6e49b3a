@@ -34,6 +34,24 @@
       "revId": "e405f791376e7372f779a31d443cdb8ff6e49b3a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1d59594_1f049fc3",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-02-12T20:29:40Z",
+      "side": 1,
+      "message": "I found the io.stop() method which exits, but doesn\u0027t clearly show the failure.  So, I went with a throw for now.  We can discuss other options if there are better ways.  Thanks!",
+      "parentUuid": "7db7541e_bccbb5e4",
+      "revId": "e405f791376e7372f779a31d443cdb8ff6e49b3a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
