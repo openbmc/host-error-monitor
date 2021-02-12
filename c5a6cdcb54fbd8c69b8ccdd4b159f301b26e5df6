@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "139186fe_5d1b8e6c",
+        "filename": "include/error_monitors/smi_monitor.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-12T15:25:58Z",
+      "side": 1,
+      "message": "With this logic, assert handler will be called more than once (i.e. After assertHandler(), polling will happen again, as assertHandler() is async operation, causing second assert to trigger the Crashdump (even before first one got a chance to complete right?).\nHow we are avoiding this? (Esp. in terms of SMI timeout).",
+      "revId": "c5a6cdcb54fbd8c69b8ccdd4b159f301b26e5df6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
