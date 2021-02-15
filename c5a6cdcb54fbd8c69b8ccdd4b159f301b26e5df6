@@ -34,6 +34,24 @@
       "revId": "c5a6cdcb54fbd8c69b8ccdd4b159f301b26e5df6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ada4d74_6ef793f9",
+        "filename": "include/error_monitors/smi_monitor.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-15T06:11:11Z",
+      "side": 1,
+      "message": "assertHandler() --\u003e will be started (not completed) and will go for waitForEvent(), but if event is received before assertHandler() completes, then assertHandler() will be called again, followed by waitForEvent() (even when the previous operation is not yet done).",
+      "parentUuid": "7f663d8c_a3a099f4",
+      "revId": "c5a6cdcb54fbd8c69b8ccdd4b159f301b26e5df6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
