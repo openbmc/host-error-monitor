@@ -93,6 +93,30 @@
       "revId": "ba9b6183ad4d728763207bbf8ee27f8e1ddb5d3c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff817e69_d02ae6ee",
+        "filename": "include/error_monitors/cpu_thermtrip_monitor.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2021-02-15T06:54:50Z",
+      "side": 1,
+      "message": "Thanks Jason, was not aware that this is tied together.",
+      "parentUuid": "636dbee2_6f9336a3",
+      "range": {
+        "startLine": 44,
+        "startChar": 9,
+        "endLine": 44,
+        "endChar": 28
+      },
+      "revId": "ba9b6183ad4d728763207bbf8ee27f8e1ddb5d3c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
