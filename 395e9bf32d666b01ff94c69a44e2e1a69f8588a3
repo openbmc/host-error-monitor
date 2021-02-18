@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "38ae6c0c_296f54bf",
+        "filename": "include/host_error_monitor.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-02-18T20:44:23Z",
+      "side": 1,
+      "message": "In the past, I have seen updates to copyright year when there are major revisions to the file.  I thought it would include the first year followed by additional years of major revisions.  However, I don\u0027t see anything like that on the Apache header instructions.  I\u0027ll change these back to just 2021.",
+      "parentUuid": "c2bfce33_cb7c39dc",
+      "range": {
+        "startLine": 2,
+        "startChar": 22,
+        "endLine": 2,
+        "endChar": 27
+      },
+      "revId": "395e9bf32d666b01ff94c69a44e2e1a69f8588a3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7ebbdcf2_36b38ede",
         "filename": "include/host_error_monitor.hpp",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2021-02-15T06:34:05Z",
       "side": 1,
       "message": "Scenario 1: \nFirst error event --\u003e startCrashdumpAndRecovery started, with crashdumpCompleteMatch created and waiting for CrashdumpComplete signal,\nNow if another error event is called, then crashdumpCompleteMatch rule is recreated by deleting the old one (i.e, there is a chance that this signal will be missed, before the match rule is re-created).\nNow, the second-crashdump must happen and then it must be collected, but if we scheduled to reset the system for first rule, and not for second event, then the same will be missed)\n\nScenario 2: \nSeocond event will clear and create the new match rule, even though that crashDump will not be accepted as old one is in operation. In this case the recoverSystem of the new event will be used instead of the old one.",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 27
+      },
+      "revId": "395e9bf32d666b01ff94c69a44e2e1a69f8588a3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "16c1ee83_769bc494",
+        "filename": "include/host_error_monitor.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-02-18T20:44:23Z",
+      "side": 1,
+      "message": "\u003e Scenario 1: \n\u003e First error event --\u003e startCrashdumpAndRecovery started, with crashdumpCompleteMatch created and waiting for CrashdumpComplete signal,\n\u003e Now if another error event is called, then crashdumpCompleteMatch rule is recreated by deleting the old one (i.e, there is a chance that this signal will be missed, before the match rule is re-created).\n\u003e Now, the second-crashdump must happen and then it must be collected, but if we scheduled to reset the system for first rule, and not for second event, then the same will be missed)\n\u003e \nThis is a valid corner case.  I don\u0027t see a good solution for it, though.\n\n\u003e Scenario 2: \n\u003e Seocond event will clear and create the new match rule, even though that crashDump will not be accepted as old one is in operation. In this case the recoverSystem of the new event will be used instead of the old one.\n\nThis is desired behavior.  If crashdump fails and will never complete, we want to replace the old match object on a new error.",
+      "parentUuid": "7ebbdcf2_36b38ede",
       "range": {
         "startLine": 65,
         "startChar": 4,
