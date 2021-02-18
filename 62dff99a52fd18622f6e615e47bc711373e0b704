@@ -99,6 +99,24 @@
       "revId": "62dff99a52fd18622f6e615e47bc711373e0b704",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f63cb024_04951d63",
+        "filename": "include/error_monitors/smi_monitor.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-02-18T20:50:09Z",
+      "side": 1,
+      "message": "Our current builds are all from a single platform layer, so we don\u0027t have that problem, yet.  When it happens, we may need to rework how the signal monitors are started.",
+      "parentUuid": "2553afca_739434c0",
+      "revId": "62dff99a52fd18622f6e615e47bc711373e0b704",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
