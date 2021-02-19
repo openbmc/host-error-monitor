@@ -93,6 +93,30 @@
       "revId": "395e9bf32d666b01ff94c69a44e2e1a69f8588a3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "267045f0_6cfca173",
+        "filename": "include/host_error_monitor.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-02-19T22:43:46Z",
+      "side": 1,
+      "message": "I think I found a solution for both scenarios.\n\nScenario 1: The match object will not be destroyed and re-created if it already exists.  This will help avoid missing the signal.\n\nScenario 2: Recovery is set to whatever is the newest request, so if the second request changes the recovery request, that is what will be used.\n\nI forced it to call startCrashdumpAndRecovery() twice in a row and the second call updated the recovery option but did not destroy the existing match object and both calls were handled correctly.",
+      "parentUuid": "16c1ee83_769bc494",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 27
+      },
+      "revId": "395e9bf32d666b01ff94c69a44e2e1a69f8588a3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
