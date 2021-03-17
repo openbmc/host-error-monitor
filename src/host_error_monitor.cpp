@@ -34,6 +34,19 @@ bool hostIsOff()
 
 static void init()
 {
+    static bool initialized = false;
+
+    if (!initialized)
+    {
+        initialized = true;
+        if (!error_monitors::startMonitors(io, conn))
+        {
+            throw std::runtime_error("Failed to start signal monitors");
+        }
+    }
+}
+static void initializeHostState()
+{
     // Get the current host state to prepare to start the signal monitors
     conn->async_method_call(
         [](boost::system::error_code ec,
@@ -50,11 +63,8 @@ static void init()
             }
             hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
 
-            // Now we have the host state, start the signal monitors
-            if (!error_monitors::startMonitors(io, conn))
-            {
-                throw std::runtime_error("Failed to start signal monitors");
-            }
+            // Now we have the host state, we can init if needed
+            init();
         },
         "xyz.openbmc_project.State.Host", "/xyz/openbmc_project/state/host0",
         "org.freedesktop.DBus.Properties", "Get",
@@ -96,6 +106,9 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
 
             hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
 
+            // Now we have the host state, we can init if needed
+            init();
+
             if (!hostOff)
             {
                 // Notify error monitors when the host turns on
@@ -122,7 +135,7 @@ int main(int argc, char* argv[])
         host_error_monitor::startHostStateMonitor();
 
     // Initialize the signal monitors
-    host_error_monitor::init();
+    host_error_monitor::initializeHostState();
 
     host_error_monitor::io.run();
 

@@ -106,9 +106,9 @@ static inline bool peciError(EPECIStatus peciStatus, uint8_t cc)
 static void printPECIError(const std::string& reg, const size_t addr,
                            const EPECIStatus peciStatus, const size_t cc)
 {
-    std::cerr << "Failed to read " << reg << " on CPU address " << addr
-              << ". Error: " << peciStatus << ": cc: 0x" << std::hex << cc
-              << "\n";
+    std::cerr << "Failed to read " << reg << " on CPU address " << std::dec
+              << addr << ". Error: " << peciStatus << ": cc: 0x" << std::hex
+              << cc << "\n";
 }
 
 static void beep(std::shared_ptr<sdbusplus::asio::connection> conn,
