@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "217102b8_9e704e28",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2021-03-19T00:13:00Z",
+      "side": 1,
+      "message": "I am not familiar with the code to know for sure. So I thought I ask:\nWhen power-control starts later, is it OK to not call init if it returns at line 96 or line 104?",
+      "range": {
+        "startLine": 109,
+        "startChar": 0,
+        "endLine": 110,
+        "endChar": 19
+      },
+      "revId": "4a6e45c4c2f38bc64afe5faac05ea82b3adb8d93",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
