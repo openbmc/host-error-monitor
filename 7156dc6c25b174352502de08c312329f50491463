@@ -1,0 +1,153 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "679be74d_71c90359",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-01-10T21:25:18Z",
+      "side": 1,
+      "message": "The current SMI monitor is based on the GPIO Polling base class.  I don\u0027t think this is the right place to add eSPI polling.\n\nAt the least, I\u0027d add this as a new monitor rather than using the existing SMI monitor.  You also might be able to make a generic eSPI Polling base class that could be used for the SMI signal and for other eSPI signals that may need to be monitored in the future.",
+      "revId": "7156dc6c25b174352502de08c312329f50491463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "afc05e98_97d6a83f",
+        "filename": "include/error_monitors/smi_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-01-10T21:25:18Z",
+      "side": 1,
+      "message": "nit: eSPIFd",
+      "range": {
+        "startLine": 42,
+        "startChar": 5,
+        "endLine": 42,
+        "endChar": 12
+      },
+      "revId": "7156dc6c25b174352502de08c312329f50491463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "429f7715_a313a3f7",
+        "filename": "include/error_monitors/smi_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-01-10T21:25:18Z",
+      "side": 1,
+      "message": "nit: eSPIDev",
+      "range": {
+        "startLine": 45,
+        "startChar": 56,
+        "endLine": 45,
+        "endChar": 64
+      },
+      "revId": "7156dc6c25b174352502de08c312329f50491463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3c4f7755_58bbd812",
+        "filename": "include/error_monitors/smi_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-01-10T21:25:18Z",
+      "side": 1,
+      "message": "nit: eSPIDevName",
+      "range": {
+        "startLine": 50,
+        "startChar": 24,
+        "endLine": 50,
+        "endChar": 36
+      },
+      "revId": "7156dc6c25b174352502de08c312329f50491463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5c45d1c1_2f1c6307",
+        "filename": "include/error_monitors/smi_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-01-10T21:25:18Z",
+      "side": 1,
+      "message": "nit: asyncReadESPI",
+      "range": {
+        "startLine": 65,
+        "startChar": 6,
+        "endLine": 65,
+        "endChar": 19
+      },
+      "revId": "7156dc6c25b174352502de08c312329f50491463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e70be0d7_82707d3d",
+        "filename": "include/error_monitors/smi_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-01-10T21:25:18Z",
+      "side": 1,
+      "message": "nit: eSPIBuffer",
+      "range": {
+        "startLine": 69,
+        "startChar": 42,
+        "endLine": 69,
+        "endChar": 52
+      },
+      "revId": "7156dc6c25b174352502de08c312329f50491463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5ae904f8_3460e37e",
+        "filename": "include/error_monitors/smi_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-01-10T21:25:18Z",
+      "side": 1,
+      "message": "Should the polling timer wait here before reading the eSPI value again?",
+      "revId": "7156dc6c25b174352502de08c312329f50491463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
