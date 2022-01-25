@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "be82e962_1fa04b64",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000295
+      },
+      "writtenOn": "2022-01-25T09:45:16Z",
+      "side": 1,
+      "message": "Hi Jason, Can we overwrite this smi monitor function for eSPI based monitor ? \nor do we need to separate monitor ?",
+      "parentUuid": "679be74d_71c90359",
+      "revId": "7156dc6c25b174352502de08c312329f50491463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "afc05e98_97d6a83f",
