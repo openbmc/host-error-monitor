@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4a8dfe3a_9c7e51cb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-02-01T22:37:43Z",
+      "side": 1,
+      "message": "This looks good.  Let\u0027s wait for the new message to be added to the registry in case the ID changes, then we can merge this.  Thanks!",
+      "revId": "1a0b0781288e14398735b3062013b6166bcd525b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
