@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "adaa19a0_c7a91d07",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2022-02-17T05:49:04Z",
+      "side": 1,
+      "message": "Hi Jason, Other patch BMCWEB: 50839: Add message registry entry for Memhot event | https://gerrit.openbmc-project.xyz/c/openbmc/bmcweb/+/50839\nalready merged. Please provide +2 for this patch to merge.",
+      "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
