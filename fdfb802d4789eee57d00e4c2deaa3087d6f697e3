@@ -33,6 +33,24 @@
       "message": "Just having the CPU number here may be confusing.  I think the final message will now be \"CPU 0 component over temperature and being throttled.\",  which is not accurate.  For memhot it\u0027s the memory that is being throttled.\n\nMaybe just add \"memory\" to the string on line 33 to it reads, \"CPU 0 memory component over temperature and being throttled.\"?",
       "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "193c078f_b512ce51",
+        "filename": "include/error_monitors/memhot_monitor.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2022-02-18T23:45:11Z",
+      "side": 1,
+      "message": "Should we just take the word \"component\" out of the string in the message registry?  \"CPU 0 memory over temperature and being throttled\" sounds more reasonable and natural than the a sentence with \"component\" in it.",
+      "parentUuid": "eae67442_abc75901",
+      "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
