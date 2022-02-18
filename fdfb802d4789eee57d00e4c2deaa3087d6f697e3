@@ -16,6 +16,23 @@
       "message": "Hi Jason, Other patch BMCWEB: 50839: Add message registry entry for Memhot event | https://gerrit.openbmc-project.xyz/c/openbmc/bmcweb/+/50839\nalready merged. Please provide +2 for this patch to merge.",
       "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eae67442_abc75901",
+        "filename": "include/error_monitors/memhot_monitor.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-02-18T20:59:48Z",
+      "side": 1,
+      "message": "Just having the CPU number here may be confusing.  I think the final message will now be \"CPU 0 component over temperature and being throttled.\",  which is not accurate.  For memhot it\u0027s the memory that is being throttled.\n\nMaybe just add \"memory\" to the string on line 33 to it reads, \"CPU 0 memory component over temperature and being throttled.\"?",
+      "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
