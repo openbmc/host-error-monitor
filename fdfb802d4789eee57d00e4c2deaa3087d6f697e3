@@ -51,6 +51,24 @@
       "parentUuid": "eae67442_abc75901",
       "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e8c86791_affdc77f",
+        "filename": "include/error_monitors/memhot_monitor.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1001328
+      },
+      "writtenOn": "2022-02-23T14:09:33Z",
+      "side": 1,
+      "message": "Hi Ed, This is for journalctl log message only and shown as \"Feb 22 23:08:10 intel-obmc host-error-monitor[278]: HostError: CPU 1 Memhot.\"\n\nBelow is the redfish event log,\n{\n            \"@odata.id\": \"/redfish/v1/Systems/system/LogServices/EventLog/Entries/1645571290\",\n            \"@odata.type\": \"#LogEntry.v1_8_0.LogEntry\",\n            \"Created\": \"2022-02-22T23:08:10+00:00\",\n            \"EntryType\": \"Event\",\n            \"Id\": \"1645571290\",\n            \"Message\": \"CPU 1 component over temperature and being throttled.\",\n            \"MessageArgs\": [\n                \"CPU 1\"\n            ],\n            \"MessageId\": \"OpenBMC.0.1.ComponentOverTemperature\",\n            \"Name\": \"System Event Log Entry\",\n            \"Severity\": \"Critical\"\n},",
+      "parentUuid": "193c078f_b512ce51",
+      "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
