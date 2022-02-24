@@ -69,6 +69,24 @@
       "parentUuid": "193c078f_b512ce51",
       "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "80977c9e_36e9b714",
+        "filename": "include/error_monitors/memhot_monitor.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-02-24T21:39:45Z",
+      "side": 1,
+      "message": "I\u0027m okay with changing the registry as I also like the sentence better without \"component\" in it.\n\nHowever, we should still add the word \"memory\" here so it specifies that it is the memory overheating and not the CPU itself.",
+      "parentUuid": "e8c86791_affdc77f",
+      "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
