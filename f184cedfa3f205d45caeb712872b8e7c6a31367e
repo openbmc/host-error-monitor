@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c72b35f2_e457908d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2022-02-28T20:37:05Z",
+      "side": 1,
+      "message": "Is the GPIO mockup driver some platform specific tool to force or simulate certain signals from the CPLD, or some OpenBMC component I\u0027m not familiar with?  (Or at least not recognizing by name.)  If the former, I think it might be good to expand the description slightly to clarify.",
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2c8352a7_5dd44a44",
+        "filename": "include/error_monitors/cpld_crc_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2022-02-28T20:37:05Z",
+      "side": 1,
+      "message": "I gather we\u0027re assuming this signal will never change value at runtime?  (Which may be a totally fine assumption -- I guess it changing might imply a physical CPU hotplug, which is perhaps far enough outside of supported functionality to not bother with.)",
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2fd74967_143d9872",
+        "filename": "include/error_monitors/cpld_crc_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2022-02-28T20:37:05Z",
+      "side": 1,
+      "message": "Most of these are I think fairly self-explanatory, but some are slightly less obvious unless you read through the rest of the code (e.g. I at first assumed cpuPresenceName might be some dbus identifier or something, but I see it\u0027s actually just another GPIO).  Maybe add a comment documenting the arguments?",
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
