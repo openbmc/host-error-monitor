@@ -87,6 +87,24 @@
       "parentUuid": "e8c86791_affdc77f",
       "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "11df2c3f_2352b277",
+        "filename": "include/error_monitors/memhot_monitor.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1001328
+      },
+      "writtenOn": "2022-02-28T12:41:30Z",
+      "side": 1,
+      "message": "Hi Jason, there was a comment on https://gerrit.openbmc-project.xyz/c/openbmc/bmcweb/+/50839 posted by Ed,\"Does this need to be a more generic message \"component overheated\".  Surely memory isn\u0027t the only thing that can overheat, and it seems like we don\u0027t want to have a bunch of \"CpuOverheated\" \"GpuOverheated\" \"DriveOverheated\"\n\nAlso, in many other places in redfish, \"heated\" isn\u0027t really used, the word \"temperature\" is used.  So should this message be \"ComponentOverTemperature\"\".(redfish-core/include/registries/openbmc_message_registry.hpp\n#1046)\n\nAnd a component word was added later to make it generic. If we will change an error message in terms of memory then we need to rename Component ID in registry. \"ComponentOverTemperature\"-\u003e\"MemeoryOverTemperature\" that turns to specific.",
+      "parentUuid": "80977c9e_36e9b714",
+      "revId": "fdfb802d4789eee57d00e4c2deaa3087d6f697e3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
