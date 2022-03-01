@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "19435f64_47ab53e3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-03-01T17:52:36Z",
+      "side": 1,
+      "message": "It\u0027s a standard Linux driver available for testing GPIOs: https://www.kernel.org/doc/html/latest/admin-guide/gpio/gpio-mockup.html.",
+      "parentUuid": "c72b35f2_e457908d",
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "67a91f31_9148a6f7",
@@ -31,6 +49,30 @@
       "writtenOn": "2022-03-01T01:20:11Z",
       "side": 1,
       "message": "bool?",
+      "range": {
+        "startLine": 32,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 19
+      },
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1495c024_5722e36b",
+        "filename": "include/error_monitors/cpld_crc_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-03-01T17:52:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "67a91f31_9148a6f7",
       "range": {
         "startLine": 32,
         "startChar": 4,
@@ -66,6 +108,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a2b1064f_32488c8a",
+        "filename": "include/error_monitors/cpld_crc_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-03-01T17:52:36Z",
+      "side": 1,
+      "message": "Yes, the signal originates from the CPU.",
+      "parentUuid": "ae863035_6f75f965",
+      "range": {
+        "startLine": 41,
+        "startChar": 37,
+        "endLine": 41,
+        "endChar": 45
+      },
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "847887c4_1d9bcb2d",
         "filename": "include/error_monitors/cpld_crc_monitor.hpp",
         "patchSetId": 1
@@ -77,6 +143,30 @@
       "writtenOn": "2022-03-01T01:20:11Z",
       "side": 1,
       "message": "Can this fail because the line was busy, i.e. used by other app?",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 25
+      },
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f68121e3_fa83e105",
+        "filename": "include/error_monitors/cpld_crc_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-03-01T17:52:36Z",
+      "side": 1,
+      "message": "Yes.  If another app claims this GPIO in the future, we will need to adjust this.",
+      "parentUuid": "847887c4_1d9bcb2d",
       "range": {
         "startLine": 64,
         "startChar": 0,
@@ -106,6 +196,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "242447c9_fd73c263",
+        "filename": "include/error_monitors/cpld_crc_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-03-01T17:52:36Z",
+      "side": 1,
+      "message": "That\u0027s correct.  Our BMC implementation does not support CPU hotplug.",
+      "parentUuid": "2c8352a7_5dd44a44",
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "2fd74967_143d9872",
         "filename": "include/error_monitors/cpld_crc_monitor.hpp",
         "patchSetId": 1
@@ -117,6 +225,24 @@
       "writtenOn": "2022-02-28T20:37:05Z",
       "side": 1,
       "message": "Most of these are I think fairly self-explanatory, but some are slightly less obvious unless you read through the rest of the code (e.g. I at first assumed cpuPresenceName might be some dbus identifier or something, but I see it\u0027s actually just another GPIO).  Maybe add a comment documenting the arguments?",
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4cbe2303_ae18b658",
+        "filename": "include/error_monitors/cpld_crc_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-03-01T17:52:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2fd74967_143d9872",
       "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
