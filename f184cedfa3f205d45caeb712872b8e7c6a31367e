@@ -130,6 +130,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "57481fb6_cb564890",
+        "filename": "include/error_monitors/cpld_crc_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2022-03-01T18:50:27Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a2b1064f_32488c8a",
+      "range": {
+        "startLine": 41,
+        "startChar": 37,
+        "endLine": 41,
+        "endChar": 45
+      },
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "847887c4_1d9bcb2d",
@@ -167,6 +191,30 @@
       "side": 1,
       "message": "Yes.  If another app claims this GPIO in the future, we will need to adjust this.",
       "parentUuid": "847887c4_1d9bcb2d",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 25
+      },
+      "revId": "f184cedfa3f205d45caeb712872b8e7c6a31367e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bb5db902_3be76d2c",
+        "filename": "include/error_monitors/cpld_crc_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2022-03-01T18:50:27Z",
+      "side": 1,
+      "message": "Where is the GPIO name specified?\ncpusensor uses cpuPresence gpio, probably the same one?\nhttps://github.com/openbmc/dbus-sensors/blob/master/include/CPUSensor.hpp#L72\nNot sure whether there could be race condition because it releases it after reading.",
+      "parentUuid": "f68121e3_fa83e105",
       "range": {
         "startLine": 64,
         "startChar": 0,
