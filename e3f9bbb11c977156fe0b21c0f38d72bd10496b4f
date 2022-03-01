@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5e1cc77b_7d121612",
+        "filename": "include/error_monitors/mcerr_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2022-03-01T00:08:03Z",
+      "side": 1,
+      "message": "nit:2022",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "e3f9bbb11c977156fe0b21c0f38d72bd10496b4f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "036512ac_8a03c2aa",
+        "filename": "include/error_monitors/mcerr_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2022-03-01T00:08:03Z",
+      "side": 1,
+      "message": "nit: const?",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 18
+      },
+      "revId": "e3f9bbb11c977156fe0b21c0f38d72bd10496b4f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
