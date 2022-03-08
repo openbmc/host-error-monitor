@@ -16,6 +16,23 @@
       "message": "Please review.",
       "revId": "ed6972aefe37a039d5b41d183eafc8c48549be67",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b30dc23f_c056e89e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-03-08T14:04:19Z",
+      "side": 1,
+      "message": "Looks good to me.  It\u0027s been at +1 for a few days, so promoting to +2 and can adjust for any additional feedback in a later commit.",
+      "revId": "ed6972aefe37a039d5b41d183eafc8c48549be67",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
