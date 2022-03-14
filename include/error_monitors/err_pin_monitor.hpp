@@ -74,70 +74,9 @@ class ErrPinMonitor :
                         msg.c_str(), NULL);
     }
 
-    void checkErrPinCPUs()
-    {
-        errPinCPUs.reset();
-        for (size_t cpu = 0, addr = MIN_CLIENT_ADDR; addr <= MAX_CLIENT_ADDR;
-             cpu++, addr++)
-        {
-            EPECIStatus peciStatus = PECI_CC_SUCCESS;
-            uint8_t cc = 0;
-            CPUModel model{};
-            uint8_t stepping = 0;
-            peciStatus = peci_GetCPUID(addr, &model, &stepping, &cc);
-            if (peciStatus != PECI_CC_SUCCESS)
-            {
-                if (peciStatus != PECI_CC_CPU_NOT_PRESENT)
-                {
-                    printPECIError("CPUID", addr, peciStatus, cc);
-                }
-                continue;
-            }
-
-            switch (model)
-            {
-                case skx:
-                {
-                    // Check the ERRPINSTS to see if this is the CPU that
-                    // caused the ERRx (B(0) D8 F0 offset 210h)
-                    uint32_t errpinsts = 0;
-                    peciStatus = peci_RdPCIConfigLocal(
-                        addr, 0, 8, 0, 0x210, sizeof(uint32_t),
-                        (uint8_t*)&errpinsts, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("ERRPINSTS", addr, peciStatus, cc);
-                        continue;
-                    }
-
-                    errPinCPUs[cpu] = (errpinsts & (1 << errPin)) != 0;
-                    break;
-                }
-                case icx:
-                {
-                    // Check the ERRPINSTS to see if this is the CPU that
-                    // caused the ERRx (B(30) D0 F3 offset 274h) (Note: Bus
-                    // 30 is accessed on PECI as bus 13)
-                    uint32_t errpinsts = 0;
-                    peciStatus = peci_RdEndPointConfigPciLocal(
-                        addr, 0, 13, 0, 3, 0x274, sizeof(uint32_t),
-                        (uint8_t*)&errpinsts, &cc);
-                    if (peciError(peciStatus, cc))
-                    {
-                        printPECIError("ERRPINSTS", addr, peciStatus, cc);
-                        continue;
-                    }
-
-                    errPinCPUs[cpu] = (errpinsts & (1 << errPin)) != 0;
-                    break;
-                }
-            }
-        }
-    }
-
     void startPolling() override
     {
-        checkErrPinCPUs();
+        checkErrPinCPUs(errPin, errPinCPUs);
         host_error_monitor::base_gpio_poll_monitor::BaseGPIOPollMonitor::
             startPolling();
     }
