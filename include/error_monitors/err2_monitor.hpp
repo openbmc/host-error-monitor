@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 #pragma once
-#include <error_monitors/err_pin_monitor.hpp>
+#include <error_monitors/err_pin_timeout_monitor.hpp>
 #include <host_error_monitor.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 
@@ -24,13 +24,15 @@ namespace host_error_monitor::err2_monitor
 {
 static constexpr bool debug = false;
 
-class Err2Monitor : public host_error_monitor::err_pin_monitor::ErrPinMonitor
+class Err2Monitor :
+    public host_error_monitor::err_pin_timeout_monitor::ErrPinTimeoutMonitor
 {
     const static constexpr uint8_t beepCPUErr2 = 5;
 
     void assertHandler() override
     {
-        host_error_monitor::err_pin_monitor::ErrPinMonitor::assertHandler();
+        host_error_monitor::err_pin_timeout_monitor::ErrPinTimeoutMonitor::
+            assertHandler();
 
         beep(conn, beepCPUErr2);
 
@@ -59,8 +61,8 @@ class Err2Monitor : public host_error_monitor::err_pin_monitor::ErrPinMonitor
     Err2Monitor(boost::asio::io_service& io,
                 std::shared_ptr<sdbusplus::asio::connection> conn,
                 const std::string& signalName) :
-        host_error_monitor::err_pin_monitor::ErrPinMonitor(io, conn, signalName,
-                                                           2)
+        host_error_monitor::err_pin_timeout_monitor::ErrPinTimeoutMonitor(
+            io, conn, signalName, 2)
     {}
 };
 } // namespace host_error_monitor::err2_monitor

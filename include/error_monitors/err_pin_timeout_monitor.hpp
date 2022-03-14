@@ -22,11 +22,11 @@
 
 #include <bitset>
 
-namespace host_error_monitor::err_pin_monitor
+namespace host_error_monitor::err_pin_timeout_monitor
 {
 static constexpr bool debug = false;
 
-class ErrPinMonitor :
+class ErrPinTimeoutMonitor :
     public host_error_monitor::base_gpio_poll_monitor::BaseGPIOPollMonitor
 {
     size_t errPin;
@@ -82,9 +82,9 @@ class ErrPinMonitor :
     }
 
   public:
-    ErrPinMonitor(boost::asio::io_service& io,
-                  std::shared_ptr<sdbusplus::asio::connection> conn,
-                  const std::string& signalName, const size_t errPin) :
+    ErrPinTimeoutMonitor(boost::asio::io_service& io,
+                         std::shared_ptr<sdbusplus::asio::connection> conn,
+                         const std::string& signalName, const size_t errPin) :
         BaseGPIOPollMonitor(io, conn, signalName, assertValue,
                             errPinPollingTimeMs, errPinTimeoutMs),
         errPin(errPin)
@@ -95,4 +95,4 @@ class ErrPinMonitor :
         }
     }
 };
-} // namespace host_error_monitor::err_pin_monitor
+} // namespace host_error_monitor::err_pin_timeout_monitor
