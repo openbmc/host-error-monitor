@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "20d78a96_abb1b7a5",
+        "filename": "include/error_monitors/register_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1001143
+      },
+      "writtenOn": "2022-03-15T18:12:25Z",
+      "side": 1,
+      "message": "In the future this would likely be \"faultlog\" instead of \"bmc\" after the corresponding phosphor-debug-collector code gets submitted",
+      "range": {
+        "startLine": 119,
+        "startChar": 75,
+        "endLine": 119,
+        "endChar": 78
+      },
+      "revId": "94acd6f4b5d9f20ea913476ad40b77ee17981b3a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "616b426e_f627df3a",
+        "filename": "include/error_monitors/register_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1001143
+      },
+      "writtenOn": "2022-03-15T18:12:25Z",
+      "side": 1,
+      "message": "We would need to somehow wait for the temperature readings to be received before calling createDump()",
+      "revId": "94acd6f4b5d9f20ea913476ad40b77ee17981b3a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
