@@ -16,7 +16,7 @@
 #pragma once
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <error_monitors/base_monitor.hpp>
+#include <error_monitors/base_poll_monitor.hpp>
 #include <gpiod.hpp>
 #include <host_error_monitor.hpp>
 #include <sdbusplus/asio/object_server.hpp>
@@ -33,14 +33,10 @@ enum class AssertValue
     highAssert = 1,
 };
 
-class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
+class BaseGPIOPollMonitor :
+    public host_error_monitor::base_poll_monitor::BasePollMonitor
 {
     AssertValue assertValue;
-    size_t pollingTimeMs;
-    size_t timeoutMs;
-
-    boost::asio::steady_timer pollingTimer;
-    std::chrono::steady_clock::time_point timeoutTime;
 
     gpiod::line line;
     boost::asio::posix::stream_descriptor event;
@@ -102,8 +98,8 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
   public:
     virtual void assertHandler()
     {
-        std::cerr << signalName << " asserted for " << std::to_string(timeoutMs)
-                  << " ms\n";
+        std::cerr << signalName << " asserted for "
+                  << std::to_string(getTimeoutMs()) << " ms\n";
         logEvent();
     }
 
@@ -161,22 +157,8 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
             });
     }
 
-  public:
-    virtual void startPolling()
+    void pollingActions() override
     {
-        timeoutTime = std::chrono::steady_clock::now() +
-                      std::chrono::duration<int, std::milli>(timeoutMs);
-        poll();
-    }
-
-  private:
-    void poll()
-    {
-        if constexpr (debug)
-        {
-            std::cerr << "Polling " << signalName << "\n";
-        }
-
         flushEvents();
 
         if (!asserted())
@@ -194,30 +176,12 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
         {
             std::cerr << signalName << " asserted\n";
         }
+    }
 
-        if (std::chrono::steady_clock::now() > timeoutTime)
-        {
-            assertHandler();
-            waitForEvent();
-            return;
-        }
-
-        pollingTimer.expires_after(std::chrono::milliseconds(pollingTimeMs));
-        pollingTimer.async_wait([this](const boost::system::error_code ec) {
-            if (ec)
-            {
-                // operation_aborted is expected if timer is canceled before
-                // completion.
-                if (ec != boost::asio::error::operation_aborted)
-                {
-                    std::cerr << signalName
-                              << " polling async_wait failed: " << ec.message()
-                              << "\n";
-                }
-                return;
-            }
-            poll();
-        });
+    void handleTimeout() override
+    {
+        assertHandler();
+        waitForEvent();
     }
 
   public:
@@ -225,9 +189,8 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
                         std::shared_ptr<sdbusplus::asio::connection> conn,
                         const std::string& signalName, AssertValue assertValue,
                         size_t pollingTimeMs, size_t timeoutMs) :
-        BaseMonitor(io, conn, signalName),
-        pollingTimer(io), event(io), assertValue(assertValue),
-        pollingTimeMs(pollingTimeMs), timeoutMs(timeoutMs)
+        BasePollMonitor(io, conn, signalName, pollingTimeMs, timeoutMs),
+        event(io), assertValue(assertValue)
     {
         if (!requestEvents())
         {
@@ -241,16 +204,6 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
     {
         event.cancel();
         startPolling();
-    }
-
-    size_t getTimeoutMs()
-    {
-        return timeoutMs;
-    }
-
-    void setTimeoutMs(size_t newTimeoutMs)
-    {
-        timeoutMs = newTimeoutMs;
     }
 };
 } // namespace host_error_monitor::base_gpio_poll_monitor
