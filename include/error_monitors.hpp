@@ -16,6 +16,7 @@
 #pragma once
 #include <sdbusplus/asio/object_server.hpp>
 // #include <error_monitors/smi_monitor.hpp>
+#include <error_monitors/register_monitor.hpp>
 
 #include <memory>
 
@@ -24,6 +25,8 @@ namespace host_error_monitor::error_monitors
 // Error signals to monitor
 // static std::unique_ptr<host_error_monitor::smi_monitor::SMIMonitor>
 // smiMonitor;
+static std::unique_ptr<host_error_monitor::register_monitor::RegisterMonitor>
+registerMonitor;
 
 // Check if all the signal monitors started successfully
 bool checkMonitors()
@@ -31,6 +34,7 @@ bool checkMonitors()
     bool ret = true;
 
     // ret &= smiMonitor->isValid();
+    ret &= registerMonitor->isValid();
 
     return ret;
 }
@@ -43,6 +47,14 @@ bool startMonitors(boost::asio::io_service& io,
     // std::make_unique<host_error_monitor::smi_monitor::SMIMonitor>(
     //     io, conn, "SMI");
 
+    static constexpr size_t pollingTimeMs = 5000;
+    static constexpr size_t timeoutMs = 15000;
+    // TODO(heinzboehmer): do something about JSON filepath
+    const std::string jsonFilepath = "/tmp/example_config.json";
+    registerMonitor =
+    std::make_unique<host_error_monitor::register_monitor::RegisterMonitor>(
+           io, conn, "CPU_REGISTER", pollingTimeMs, timeoutMs, jsonFilepath);
+
     return checkMonitors();
 }
 
@@ -50,6 +62,7 @@ bool startMonitors(boost::asio::io_service& io,
 void sendHostOn()
 {
     // smiMonitor->hostOn();
+    registerMonitor->hostOn();
 }
 
 } // namespace host_error_monitor::error_monitors

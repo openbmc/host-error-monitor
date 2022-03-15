@@ -1,0 +1,48 @@
+{
+  "machineConfig": {
+    "addressType": 6,
+    // "baseTarget": 0x30
+    "baseTarget": 48,
+    "segment": 0,
+    // "baseBus": 0x7e
+    "baseBus": 126,
+    // "baseDevice": 0x1a
+    "baseDevice": 26,
+    "function": 0,
+    "bar": 0,
+    "dataLength": 4,
+    // "socketOffset": 0x80
+    "socketOffset": 128,
+    // "channelOffset": 0x4000
+    "channelOffset": 16384,
+    "numSockets": 2,
+    "numIMCs": 4,
+    "numChannels": 2
+  },
+  "registers": {
+    // 0x22c18
+    "CORRERRCNT_0": 142360,
+    // 0x22c30
+    "CORRERRTHRSHLD_0": 142384,
+    // 0x22c60
+    "RETRY_RD_ERR_LOG": 142432,
+    // 0x22c54
+    "RETRY_RD_ERR_LOG_MISC": 142420,
+    // 0x22c5c
+    "RETRY_RD_ERR_LOG_PARITY": 142428,
+    // 0x22c58
+    "RETRY_RD_ERR_LOG_ADDRESS1": 142424,
+    // 0x22c28
+    "RETRY_RD_ERR_LOG_ADDRESS2": 142376,
+    // 0x22e54
+    "RETRY_RD_ERR_SET2_LOG": 142932,
+    // 0x22e60
+    "RETRY_RD_ERR_SET2_LOG_MISC": 142944,
+    // 0x22e64
+    "RETRY_RD_ERR_SET2_LOG_PARITY": 142948,
+    // 0x22e58
+    "RETRY_RD_ERR_SET2_LOG_ADDRESS1": 142936,
+    // 0x22e5c
+    "RETRY_RD_ERR_SET2_LOG_ADDRESS2": 142940
+  }
+}
