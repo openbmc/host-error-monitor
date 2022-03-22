@@ -81,6 +81,24 @@
       "parentUuid": "616b426e_f627df3a",
       "revId": "94acd6f4b5d9f20ea913476ad40b77ee17981b3a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a09de204_24aaeff2",
+        "filename": "include/error_monitors/register_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1001387
+      },
+      "writtenOn": "2022-03-22T00:09:37Z",
+      "side": 1,
+      "message": "Added a couple changes to address this in the latest patchset.\n\nFrom my testing, the sleep seems to allow enough time for the async calls to get scheduled and then poll() forces the calls to execute. This should fix the issues we were running into before.",
+      "parentUuid": "e363daf7_ab53c443",
+      "revId": "94acd6f4b5d9f20ea913476ad40b77ee17981b3a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
