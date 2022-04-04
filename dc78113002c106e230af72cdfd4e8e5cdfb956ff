@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e534ba24_69507d6b",
+        "filename": "include/error_monitors/base_cpu_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-04-04T18:59:15Z",
+      "side": 1,
+      "message": "The name `base_cpu_monitor` may be confusing with the the other `base` files that are designed as base classes.  Can we just call this `cpu_presence_monitor` or `cpu_missing_monitor`?",
+      "revId": "dc78113002c106e230af72cdfd4e8e5cdfb956ff",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b0afc70d_23158272",
+        "filename": "include/error_monitors/base_cpu_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-04-04T18:59:15Z",
+      "side": 1,
+      "message": "If this becomes a generic \"CPU Presence\" or \"CPU Missing\" monitor, you would want to report the CPU number in the error message.\n\nAlso, it may be better to report \"CPU x missing\" as the message.",
+      "revId": "dc78113002c106e230af72cdfd4e8e5cdfb956ff",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "86e260da_2330e9f4",
+        "filename": "include/error_monitors/base_cpu_monitor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-04-04T18:59:15Z",
+      "side": 1,
+      "message": "This currently will only check CPU presence once when the BMC boots.  If it needs to check each time the host tries to boot, you will need to re-check CPU presence in the hostOn() function.  You can see how it\u0027s done in the CPU mismatch monitor here: https://github.com/openbmc/host-error-monitor/blob/master/include/error_monitors/cpu_mismatch_monitor.hpp#L108.",
+      "revId": "dc78113002c106e230af72cdfd4e8e5cdfb956ff",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
