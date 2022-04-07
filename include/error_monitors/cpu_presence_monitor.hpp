@@ -24,23 +24,24 @@
 
 namespace host_error_monitor::base_cpu_monitor
 {
-class BaseCPUMonitor : public host_error_monitor::base_monitor::BaseMonitor
+class CPUPresenceMonitor : public host_error_monitor::base_monitor::BaseMonitor
 {
     int cpuPresent;
+    size_t cpuNum;
     const static constexpr uint8_t beepCPUMIssing = 3;
 
     void logEvent()
     {
-        std::string msg = "No CPU installed";
-
-        sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                        LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.CPUError", "REDFISH_MESSAGE_ARGS=%s",
-                        msg.c_str(), NULL);
+        sd_journal_send("MESSAGE=HostError: CPU %d missing", cpuNum,
+                        "PRIORITY=%i", LOG_ERR, "REDFISH_MESSAGE_ID=%s",
+                        "OpenBMC.0.1.CPUPresence", "REDFISH_MESSAGE_ARGS=%d",
+                        cpuNum, NULL);
     }
 
-    void baseCPUAssertHandler(std::shared_ptr<sdbusplus::asio::connection> conn)
+    void CPUPresenceAssertHandler(
+        std::shared_ptr<sdbusplus::asio::connection> conn)
     {
+        std::cerr << signalName << " asserted\n";
         // raising beep alert for base cpu missing
         beep(conn, beepCPUMIssing);
         logEvent();
@@ -74,27 +75,32 @@ class BaseCPUMonitor : public host_error_monitor::base_monitor::BaseMonitor
         return true;
     }
 
-    void checkBaseCPUPresence(std::shared_ptr<sdbusplus::asio::connection> conn)
+    void checkCPUPresence(std::shared_ptr<sdbusplus::asio::connection> conn)
     {
         // Ignore this if the CPU present
         if (!cpuPresent)
         {
-            baseCPUAssertHandler(conn);
+            CPUPresenceAssertHandler(conn);
         }
     }
 
   public:
-    BaseCPUMonitor(boost::asio::io_service& io,
-                   std::shared_ptr<sdbusplus::asio::connection> conn,
-                   const std::string& signalName) :
-        BaseMonitor(io, conn, signalName)
+    CPUPresenceMonitor(boost::asio::io_service& io,
+                       std::shared_ptr<sdbusplus::asio::connection> conn,
+                       const std::string& signalName, const size_t cpuNum) :
+        BaseMonitor(io, conn, signalName),
+        cpuNum(cpuNum)
     {
         if (!getCPUPresence(signalName))
         {
             return;
         }
-        checkBaseCPUPresence(conn);
+        checkCPUPresence(conn);
         valid = true;
+    }
+    void hostOn() override
+    {
+        checkCPUPresence(conn);
     }
 };
 } // namespace host_error_monitor::base_cpu_monitor
