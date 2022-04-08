@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3546f11f_d50ab053",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-04-08T16:15:04Z",
+      "side": 1,
+      "message": "Looks good to me.  It only checks the presence GPIO on boot, but this should be okay as CPU presence is not expected to change while the system is running.  This can be adjusted if that case needs to be handled.",
+      "revId": "57f47c44128222beb859ad9d63e9caf0c702b300",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
