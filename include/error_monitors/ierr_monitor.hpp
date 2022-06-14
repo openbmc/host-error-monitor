@@ -27,9 +27,6 @@ static constexpr bool debug = true;
 class IERRMonitor :
     public host_error_monitor::base_gpio_poll_monitor::BaseGPIOPollMonitor
 {
-    const static host_error_monitor::base_gpio_poll_monitor::AssertValue
-        assertValue =
-            host_error_monitor::base_gpio_poll_monitor::AssertValue::lowAssert;
     const static constexpr size_t ierrPollingTimeMs = 100;
     const static constexpr size_t ierrTimeoutMs = 2000;
     const static constexpr size_t ierrTimeoutMsMax =
@@ -409,7 +406,9 @@ class IERRMonitor :
   public:
     IERRMonitor(boost::asio::io_service& io,
                 std::shared_ptr<sdbusplus::asio::connection> conn,
-                const std::string& signalName) :
+                const std::string& signalName,
+                const host_error_monitor::base_gpio_poll_monitor::AssertValue
+                    assertValue) :
         BaseGPIOPollMonitor(io, conn, signalName, assertValue,
                             ierrPollingTimeMs, ierrTimeoutMs)
     {
@@ -452,5 +451,12 @@ class IERRMonitor :
             startPolling();
         }
     }
+    IERRMonitor(boost::asio::io_service& io,
+                std::shared_ptr<sdbusplus::asio::connection> conn,
+                const std::string& signalName) :
+        IERRMonitor(
+            io, conn, signalName,
+            host_error_monitor::base_gpio_poll_monitor::AssertValue::lowAssert)
+    {}
 };
 } // namespace host_error_monitor::ierr_monitor
