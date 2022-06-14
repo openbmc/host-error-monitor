@@ -23,9 +23,6 @@ namespace host_error_monitor::mcerr_monitor
 class MCERRMonitor :
     public host_error_monitor::base_gpio_monitor::BaseGPIOMonitor
 {
-    const static host_error_monitor::base_gpio_monitor::AssertValue
-        assertValue =
-            host_error_monitor::base_gpio_monitor::AssertValue::lowAssert;
     const size_t cpuNum;
 
     void logEvent() override
@@ -39,9 +36,12 @@ class MCERRMonitor :
     }
 
   public:
-    MCERRMonitor(boost::asio::io_service& io,
-                 std::shared_ptr<sdbusplus::asio::connection> conn,
-                 const std::string& signalName, const size_t cpuNum) :
+    MCERRMonitor(
+        boost::asio::io_service& io,
+        std::shared_ptr<sdbusplus::asio::connection> conn,
+        const std::string& signalName,
+        const host_error_monitor::base_gpio_monitor::AssertValue assertValue,
+        const size_t cpuNum) :
         BaseGPIOMonitor(io, conn, signalName, assertValue),
         cpuNum(cpuNum)
     {
@@ -50,5 +50,13 @@ class MCERRMonitor :
             startMonitoring();
         }
     }
+    MCERRMonitor(boost::asio::io_service& io,
+                 std::shared_ptr<sdbusplus::asio::connection> conn,
+                 const std::string& signalName, const size_t cpuNum) :
+        MCERRMonitor(
+            io, conn, signalName,
+            host_error_monitor::base_gpio_monitor::AssertValue::lowAssert,
+            cpuNum)
+    {}
 };
 } // namespace host_error_monitor::mcerr_monitor
