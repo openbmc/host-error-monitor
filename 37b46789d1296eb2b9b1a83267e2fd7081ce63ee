@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d82634b6_e06b2527",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-06-22T16:04:14Z",
+      "side": 1,
+      "message": "Since the MCERR monitor is new, I\u0027m proposing to just add the parameter instead of trying to handle it as a default.",
+      "revId": "37b46789d1296eb2b9b1a83267e2fd7081ce63ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
