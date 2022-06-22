@@ -30,7 +30,7 @@ class MCERRMonitor :
 
     void logEvent() override
     {
-        std::string msg = "MCERR on CPU " + std::to_string(cpuNum + 1);
+        std::string msg = "MCERR on CPU " + std::to_string(cpuNum);
 
         sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
                         LOG_INFO, "REDFISH_MESSAGE_ID=%s",
