@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fb46c02b_2f771ac8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2022-06-23T21:16:04Z",
+      "side": 1,
+      "message": "human-readable. does it mean 1 based CPU number? Seems like increment by 1 will turn 0 based number to 1 base number. Why is it not correct?",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 38
+      },
+      "revId": "87315f553a34cce04791f5de22532b50dea3994d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
