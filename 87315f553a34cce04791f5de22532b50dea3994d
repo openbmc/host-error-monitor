@@ -22,6 +22,30 @@
       },
       "revId": "87315f553a34cce04791f5de22532b50dea3994d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "20340106_f2533230",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-06-24T15:36:30Z",
+      "side": 1,
+      "message": "human-readable as in whatever the developer wants their users to see, so we shouldn\u0027t mess with it.  In our systems we display as 1-based, so it was incorrectly incrementing CPU 1 to 2 and 2 to 3.",
+      "parentUuid": "fb46c02b_2f771ac8",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 38
+      },
+      "revId": "87315f553a34cce04791f5de22532b50dea3994d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
