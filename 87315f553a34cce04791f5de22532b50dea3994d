@@ -1,0 +1,9 @@
+Code-Review+1: Zev Weiss <zev@bewilderbeest.net>
+Code-Review+1: Zhikui Ren <zhikui.ren@intel.com>
+Code-Review+2: Jason Bills <jason.m.bills@linux.intel.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Jason Bills <jason.m.bills@linux.intel.com>
+Submitted-at: Fri, 24 Jun 2022 16:51:47 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/host-error-monitor/+/54806
+Project: openbmc/host-error-monitor
+Branch: refs/heads/master
