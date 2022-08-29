@@ -1,5 +1,5 @@
 /*
-// Copyright (c) 2021 Intel Corporation
+// Copyright (c) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,28 +27,10 @@ class CPUThermtripMonitor :
         assertValue =
             host_error_monitor::base_gpio_monitor::AssertValue::lowAssert;
     size_t cpuNum;
-    gpiod::line cpuFIVRFaultLine;
 
     void logEvent() override
     {
-        if (cpuFIVRFaultLine.get_value() == 0)
-        {
-            cpuBootFIVRFaultLog();
-        }
-        else
-        {
-            cpuThermTripLog();
-        }
-    }
-
-    void cpuBootFIVRFaultLog()
-    {
-        std::string msg = "Boot FIVR Fault on CPU " + std::to_string(cpuNum);
-
-        sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                        LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.CPUError", "REDFISH_MESSAGE_ARGS=%s",
-                        msg.c_str(), NULL);
+        cpuThermTripLog();
     }
 
     void cpuThermTripLog()
@@ -61,44 +43,13 @@ class CPUThermtripMonitor :
                         cpuNum, NULL);
     }
 
-    bool requestCPUFIVRFaultInput(const std::string& fivrSignalName)
-    {
-        // Find the GPIO line
-        cpuFIVRFaultLine = gpiod::find_line(fivrSignalName);
-        if (!cpuFIVRFaultLine)
-        {
-            std::cerr << "Failed to find the " << fivrSignalName << " line.\n";
-            return false;
-        }
-
-        // Request GPIO input
-        try
-        {
-            cpuFIVRFaultLine.request(
-                {"host-error-monitor", gpiod::line_request::DIRECTION_INPUT});
-        }
-        catch (std::exception&)
-        {
-            std::cerr << "Failed to request " << fivrSignalName << " input\n";
-            return false;
-        }
-
-        return true;
-    }
-
   public:
     CPUThermtripMonitor(boost::asio::io_service& io,
                         std::shared_ptr<sdbusplus::asio::connection> conn,
-                        const std::string& signalName, const size_t cpuNum,
-                        const std::string& fivrSignalName) :
+                        const std::string& signalName, const size_t cpuNum) :
         BaseGPIOMonitor(io, conn, signalName, assertValue),
         cpuNum(cpuNum)
     {
-        if (!requestCPUFIVRFaultInput(fivrSignalName))
-        {
-            valid = false;
-        }
-
         if (valid)
         {
             startMonitoring();
