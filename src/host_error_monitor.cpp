@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 #include <boost/asio/io_service.hpp>
+#include <boost/container/flat_map.hpp>
 #include <error_monitors.hpp>
 #include <host_error_monitor.hpp>
 #include <sdbusplus/asio/object_server.hpp>
