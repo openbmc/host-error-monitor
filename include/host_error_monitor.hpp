@@ -187,6 +187,11 @@ static void checkErrPinCPUs(const size_t errPin,
                 errPinCPUs[cpu] = (errpinsts & (1 << errPin)) != 0;
                 break;
             }
+            default:
+            {
+                std::cerr << "Unsupported CPU Model: 0x" << std::hex
+                          << static_cast<int>(model) << std::dec << "\n";
+            }
         }
     }
 }
