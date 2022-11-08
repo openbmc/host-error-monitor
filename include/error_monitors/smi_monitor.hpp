@@ -50,6 +50,10 @@ class SMIMonitor :
         conn->async_method_call(
             [this](boost::system::error_code ec,
                    const std::variant<bool>& property) {
+#ifdef FORCE_CRASHDUMP_WITHOUT_WARM_RESET
+                startCrashdumpAndRecovery(conn, false, "SMI Timeout");
+                return;
+#endif
                 if (ec)
                 {
                     return;

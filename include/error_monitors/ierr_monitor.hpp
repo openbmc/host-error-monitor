@@ -363,6 +363,9 @@ class IERRMonitor :
         conn->async_method_call(
             [this](boost::system::error_code ec,
                    const std::variant<bool>& property) {
+#ifdef FORCE_CRASHDUMP_WITHOUT_WARM_RESET
+                startCrashdumpAndRecovery(conn, false, "IERR");
+#else
                 if (ec)
                 {
                     return;
@@ -374,6 +377,7 @@ class IERRMonitor :
                     return;
                 }
                 startCrashdumpAndRecovery(conn, *reset, "IERR");
+#endif
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",

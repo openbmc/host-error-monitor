@@ -39,6 +39,9 @@ class Err2Monitor :
         conn->async_method_call(
             [this](boost::system::error_code ec,
                    const std::variant<bool>& property) {
+#ifdef FORCE_CRASHDUMP_WITHOUT_WARM_RESET
+                startCrashdumpAndRecovery(conn, false, "ERR2 Timeout");
+#else
                 if (ec)
                 {
                     return;
@@ -50,6 +53,7 @@ class Err2Monitor :
                     return;
                 }
                 startCrashdumpAndRecovery(conn, *reset, "ERR2 Timeout");
+#endif
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",

@@ -8,6 +8,8 @@ add_executable (host-error-monitor src/host_error_monitor.cpp)
 
 option (HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT "Enable crashdump on SMI Timeout."
         OFF)
+option (FORCE_CRASHDUMP_WITHOUT_WARM_RESET "Force enable crashdump without warm reset"
+        OFF)
 
 option (YOCTO "Enable Building in Yocto" OFF)
 
@@ -31,6 +33,9 @@ endif ()
 target_compile_definitions (host-error-monitor PRIVATE
                             $<$<BOOL:${HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT}>:
                             -DHOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT>)
+target_compile_definitions (host-error-monitor PRIVATE
+                            $<$<BOOL:${FORCE_CRASHDUMP_WITHOUT_WARM_RESET}>:
+                            -DFORCE_CRASHDUMP_WITHOUT_WARM_RESET>)
 
 target_include_directories (host-error-monitor PRIVATE ${CMAKE_SOURCE_DIR})
 
