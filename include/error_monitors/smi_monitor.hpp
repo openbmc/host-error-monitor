@@ -50,21 +50,25 @@ class SMIMonitor :
         conn->async_method_call(
             [this](boost::system::error_code ec,
                    const std::variant<bool>& property) {
-                if (ec)
+                // Default to no reset after Crashdump
+                bool reset = false;
+                if (!ec)
                 {
-                    return;
-                }
-                const bool* reset = std::get_if<bool>(&property);
-                if (reset == nullptr)
-                {
-                    std::cerr << "Unable to read reset on " << signalName
-                              << " value\n";
-                    return;
+                    const bool* resetPtr = std::get_if<bool>(&property);
+                    if (resetPtr == nullptr)
+                    {
+                        std::cerr << "Unable to read reset on "
+                                  << signalName << " value\n";
+                    }
+                    else
+                    {
+                        reset = *resetPtr;
+                    }
                 }
 #ifdef HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT
-                startCrashdumpAndRecovery(conn, *reset, "SMI Timeout");
+                startCrashdumpAndRecovery(conn, reset, "SMI Timeout");
 #else
-                if (*reset)
+                if (reset)
                 {
                     std::cout << "Recovering the system\n";
                     startWarmReset(conn);
