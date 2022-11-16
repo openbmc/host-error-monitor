@@ -30,6 +30,7 @@ class IERRMonitor :
     const static host_error_monitor::base_gpio_poll_monitor::AssertValue
         assertValue =
             host_error_monitor::base_gpio_poll_monitor::AssertValue::lowAssert;
+    std::shared_ptr<sdbusplus::asio::dbus_interface> assertIERR;
     const static constexpr size_t ierrPollingTimeMs = 100;
     const static constexpr size_t ierrTimeoutMs = 2000;
     const static constexpr size_t ierrTimeoutMsMax =
@@ -42,6 +43,8 @@ class IERRMonitor :
 
     static const constexpr char* callbackMgrPath =
         "/xyz/openbmc_project/CallbackManager";
+    static const constexpr char* assertPath =
+        "/xyz/openbmc_project/host_error_monitor/processor/IERR";
 
     void logEvent()
     {
@@ -357,6 +360,7 @@ class IERRMonitor :
             assertHandler();
 
         setLED();
+        assertIERR->set_property("Asserted", true);
 
         beep(conn, beepCPUIERR);
 
@@ -384,6 +388,7 @@ class IERRMonitor :
     void deassertHandler() override
     {
         unsetLED();
+        assertIERR->set_property("Asserted", false);
     }
 
     void setLED()
@@ -446,6 +451,11 @@ class IERRMonitor :
             },
             [this](std::size_t& resp) { return getTimeoutMs(); });
         hostErrorTimeoutIface->initialize();
+
+        assertIERR = server.add_interface(assertPath,
+            "xyz.openbmc_project.HostErrorMonitor.Processor.IERR");
+        assertIERR->register_property("Asserted", false);
+        assertIERR->initialize();
 
         if (valid)
         {
