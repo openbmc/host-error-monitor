@@ -35,7 +35,7 @@ class IERRMonitor :
     const static constexpr size_t ierrTimeoutMs = 2000;
     const static constexpr size_t ierrTimeoutMsMax =
         600000; // 10 minutes maximum
-
+    const static constexpr uint8_t ierrSelEventType = 0x00; // IERR
     const static constexpr uint8_t beepCPUIERR = 4;
 
     std::shared_ptr<sdbusplus::asio::dbus_interface> associationIERR;
@@ -458,7 +458,16 @@ class IERRMonitor :
 
         assertIERR = server.add_interface(
             assertPath, "xyz.openbmc_project.HostErrorMonitor.Processor.IERR");
-        assertIERR->register_property("Asserted", false);
+        assertIERR->register_property(
+            "Asserted", false, [conn](const bool& req, bool& resp) {
+                if (req == resp)
+                {
+                    return 1;
+                }
+                resp = req;
+                addSELLog(conn, "IERR", assertPath, ierrSelEventType, req);
+                return 1;
+            });
         assertIERR->initialize();
 
         if (valid)

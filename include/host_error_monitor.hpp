@@ -195,5 +195,24 @@ static void checkErrPinCPUs(const size_t errPin,
         }
     }
 }
-
+static constexpr uint16_t selBMCGenID = 0x0020;
+void addSELLog(std::shared_ptr<sdbusplus::asio::connection> conn,
+               const std::string& errName, const std::string& path,
+               const uint8_t& selType, bool assert)
+{
+    std::vector<uint8_t> selData{selType, 0xff, 0xff};
+    std::string message =
+        (assert) ? errName + " Asserted" : errName + " De-Asserted";
+    conn->async_method_call(
+        [](boost::system::error_code ec) {
+            if (ec)
+            {
+                std::cerr << "Add sel log failed ec = " << ec << "\n";
+                return;
+            }
+        },
+        "xyz.openbmc_project.Logging.IPMI", "/xyz/openbmc_project/Logging/IPMI",
+        "xyz.openbmc_project.Logging.IPMI", "IpmiSelAdd", message, path,
+        selData, assert, selBMCGenID);
+}
 } // namespace host_error_monitor
