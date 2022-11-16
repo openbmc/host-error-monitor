@@ -16,6 +16,23 @@
       "message": "LGTM",
       "revId": "e3824ce5b2d9de55c76e8ad09173e4fce4128b87",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "765f2aaa_099e7e88",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-11-16T21:51:55Z",
+      "side": 1,
+      "message": "Looks good, but I\u0027m still missing my +2 permissions on this repo, so I\u0027ll have to give +2 after that is resolved.",
+      "revId": "e3824ce5b2d9de55c76e8ad09173e4fce4128b87",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
