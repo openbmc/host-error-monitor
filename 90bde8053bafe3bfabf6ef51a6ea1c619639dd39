@@ -16,6 +16,24 @@
       "message": "This would be treated as a discrete sensor event which is not supported in intel-ipmi-oem.  Could you please share what this will look like in `ipmitool sel list`?",
       "revId": "90bde8053bafe3bfabf6ef51a6ea1c619639dd39",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4f659d58_db9fc934",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000934
+      },
+      "writtenOn": "2022-11-18T12:20:18Z",
+      "side": 1,
+      "message": "Yeah, it is for discrete sensors.\nPerhaps I should add option in build time to prevent people who don\u0027t need discrete sensors send sel log?\n\nActually, we also have a patch for adding 2 ThermalTrip and 2 mem_thermtrip discrete sensors in our project for a long time, but I\u0027m not sure if this kind of operation is acceptable by maintainer.",
+      "parentUuid": "6b068674_18026d3d",
+      "revId": "90bde8053bafe3bfabf6ef51a6ea1c619639dd39",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
