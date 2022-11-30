@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cffb92cd_60fbd163",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2022-11-30T19:40:33Z",
+      "side": 1,
+      "message": "Since the sensor status is on D-Bus from the first commit, couldn\u0027t phosphor-sel-logger or some other application log the event?\n\nI guess I don\u0027t see why we need both solutions in host-error-monitor (sensor status on D-Bus and direct logging of the SEL event).",
+      "revId": "18450067aeb8487f836c38b054050abb1a5a6064",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
