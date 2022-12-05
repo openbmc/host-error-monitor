@@ -43,8 +43,6 @@ class IERRMonitor :
 
     static const constexpr char* callbackMgrPath =
         "/xyz/openbmc_project/CallbackManager";
-    static const constexpr char* assertPath =
-        "/xyz/openbmc_project/host_error_monitor/processor/IERR";
 
     void logEvent()
     {
@@ -418,7 +416,8 @@ class IERRMonitor :
   public:
     IERRMonitor(boost::asio::io_service& io,
                 std::shared_ptr<sdbusplus::asio::connection> conn,
-                const std::string& signalName) :
+                const std::string& signalName,
+                const std::string& customName = std::string()) :
         BaseGPIOPollMonitor(io, conn, signalName, assertValue,
                             ierrPollingTimeMs, ierrTimeoutMs)
     {
@@ -456,8 +455,10 @@ class IERRMonitor :
             [this](std::size_t& resp) { return getTimeoutMs(); });
         hostErrorTimeoutIface->initialize();
 
+        std::string objectName = customName.empty() ? signalName : customName;
         assertIERR = server.add_interface(
-            assertPath, "xyz.openbmc_project.HostErrorMonitor.Processor.IERR");
+            "/xyz/openbmc_project/host_error_monitor/processor/" + objectName,
+            "xyz.openbmc_project.HostErrorMonitor.Processor.IERR");
         assertIERR->register_property("Asserted", false);
         assertIERR->initialize();
 
