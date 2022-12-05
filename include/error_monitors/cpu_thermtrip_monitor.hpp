@@ -26,10 +26,12 @@ class CPUThermtripMonitor :
     const static host_error_monitor::base_gpio_monitor::AssertValue
         assertValue =
             host_error_monitor::base_gpio_monitor::AssertValue::lowAssert;
+    std::shared_ptr<sdbusplus::asio::dbus_interface> assertInterface;
     size_t cpuNum;
 
     void logEvent() override
     {
+        assertInterface->set_property("Asserted", true);
         cpuThermTripLog();
     }
 
@@ -43,13 +45,29 @@ class CPUThermtripMonitor :
                         cpuNum, NULL);
     }
 
+    void deassertHandler() override
+    {
+        assertInterface->set_property("Asserted", false);
+    }
+
   public:
     CPUThermtripMonitor(boost::asio::io_service& io,
                         std::shared_ptr<sdbusplus::asio::connection> conn,
-                        const std::string& signalName, const size_t cpuNum) :
+                        const std::string& signalName, const size_t cpuNum,
+                        const std::string& customName = std::string()) :
         BaseGPIOMonitor(io, conn, signalName, assertValue),
         cpuNum(cpuNum)
     {
+        sdbusplus::asio::object_server server =
+            sdbusplus::asio::object_server(conn);
+        std::string objectName = customName.empty() ? signalName : customName;
+        std::string path =
+            "/xyz/openbmc_project/host_error_monitor/processor/" + objectName;
+
+        assertInterface = server.add_interface(
+            path, "xyz.openbmc_project.HostErrorMonitor.Processor.ThermalTrip");
+        assertInterface->register_property("Asserted", false);
+        assertInterface->initialize();
         if (valid)
         {
             startMonitoring();
