@@ -90,7 +90,7 @@ class CPUMismatchMonitor : public host_error_monitor::base_monitor::BaseMonitor
     }
 
   public:
-    CPUMismatchMonitor(boost::asio::io_service& io,
+    CPUMismatchMonitor(boost::asio::io_context& io,
                        std::shared_ptr<sdbusplus::asio::connection> conn,
                        const std::string& signalName, const size_t cpuNum) :
         BaseMonitor(io, conn, signalName),

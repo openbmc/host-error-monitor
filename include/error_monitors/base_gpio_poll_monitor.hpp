@@ -221,7 +221,7 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
     }
 
   public:
-    BaseGPIOPollMonitor(boost::asio::io_service& io,
+    BaseGPIOPollMonitor(boost::asio::io_context& io,
                         std::shared_ptr<sdbusplus::asio::connection> conn,
                         const std::string& signalName, AssertValue assertValue,
                         size_t pollingTimeMs, size_t timeoutMs) :

@@ -163,7 +163,7 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
         waitForEvent();
     }
 
-    BaseGPIOMonitor(boost::asio::io_service& io,
+    BaseGPIOMonitor(boost::asio::io_context& io,
                     std::shared_ptr<sdbusplus::asio::connection> conn,
                     const std::string& signalName, AssertValue assertValue) :
         BaseMonitor(io, conn, signalName),

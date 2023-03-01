@@ -25,12 +25,12 @@ class BaseMonitor
 {
   public:
     bool valid;
-    boost::asio::io_service& io;
+    boost::asio::io_context& io;
     std::shared_ptr<sdbusplus::asio::connection> conn;
 
     std::string signalName;
 
-    BaseMonitor(boost::asio::io_service& io,
+    BaseMonitor(boost::asio::io_context& io,
                 std::shared_ptr<sdbusplus::asio::connection> conn,
                 const std::string& signalName) :
         valid(false),

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/container/flat_map.hpp>
 #include <error_monitors.hpp>
 #include <host_error_monitor.hpp>
@@ -24,7 +24,7 @@
 
 namespace host_error_monitor
 {
-static boost::asio::io_service io;
+static boost::asio::io_context io;
 static std::shared_ptr<sdbusplus::asio::connection> conn;
 
 static bool hostOff = true;

@@ -82,7 +82,7 @@ class ErrPinTimeoutMonitor :
     }
 
   public:
-    ErrPinTimeoutMonitor(boost::asio::io_service& io,
+    ErrPinTimeoutMonitor(boost::asio::io_context& io,
                          std::shared_ptr<sdbusplus::asio::connection> conn,
                          const std::string& signalName, const size_t errPin) :
         BaseGPIOPollMonitor(io, conn, signalName, assertValue,

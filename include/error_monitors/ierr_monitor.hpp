@@ -414,7 +414,7 @@ class IERRMonitor :
     }
 
   public:
-    IERRMonitor(boost::asio::io_service& io,
+    IERRMonitor(boost::asio::io_context& io,
                 std::shared_ptr<sdbusplus::asio::connection> conn,
                 const std::string& signalName,
                 const std::string& customName = std::string()) :

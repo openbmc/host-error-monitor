@@ -37,7 +37,7 @@ class MCERRMonitor :
 
   public:
     MCERRMonitor(
-        boost::asio::io_service& io,
+        boost::asio::io_context& io,
         std::shared_ptr<sdbusplus::asio::connection> conn,
         const std::string& signalName,
         const host_error_monitor::base_gpio_monitor::AssertValue assertValue,
