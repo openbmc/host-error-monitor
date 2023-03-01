@@ -47,7 +47,7 @@ class MemThermtripMonitor :
     }
 
   public:
-    MemThermtripMonitor(boost::asio::io_service& io,
+    MemThermtripMonitor(boost::asio::io_context& io,
                         std::shared_ptr<sdbusplus::asio::connection> conn,
                         const std::string& signalName, const size_t cpuNum,
                         const std::string& customName = std::string()) :

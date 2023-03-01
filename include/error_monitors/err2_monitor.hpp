@@ -62,7 +62,7 @@ class Err2Monitor :
     }
 
   public:
-    Err2Monitor(boost::asio::io_service& io,
+    Err2Monitor(boost::asio::io_context& io,
                 std::shared_ptr<sdbusplus::asio::connection> conn,
                 const std::string& signalName) :
         host_error_monitor::err_pin_timeout_monitor::ErrPinTimeoutMonitor(

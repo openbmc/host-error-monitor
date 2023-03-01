@@ -82,7 +82,7 @@ class SMIMonitor :
     }
 
   public:
-    SMIMonitor(boost::asio::io_service& io,
+    SMIMonitor(boost::asio::io_context& io,
                std::shared_ptr<sdbusplus::asio::connection> conn,
                const std::string& signalName) :
         BaseGPIOPollMonitor(io, conn, signalName, assertValue, smiPollingTimeMs,

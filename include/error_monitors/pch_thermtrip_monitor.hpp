@@ -75,7 +75,7 @@ class PCHThermtripMonitor :
     }
 
   public:
-    PCHThermtripMonitor(boost::asio::io_service& io,
+    PCHThermtripMonitor(boost::asio::io_context& io,
                         std::shared_ptr<sdbusplus::asio::connection> conn,
                         const std::string& signalName) :
         BaseGPIOMonitor(io, conn, signalName, assertValue)

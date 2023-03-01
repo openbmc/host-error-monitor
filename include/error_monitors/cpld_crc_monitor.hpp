@@ -81,7 +81,7 @@ class CPLDCRCMonitor :
     }
 
     /** @brief Constructor to create a CPLD CRC signal monitor
-     *  @param[in] io - ASIO io_service
+     *  @param[in] io - ASIO io_context
      *  @param[in] conn - ASIO connection
      *  @param[in] signalName - GPIO name of the signal to monitor
      *  @param[in] cpuNum - CPU number associated with the signal
@@ -89,7 +89,7 @@ class CPLDCRCMonitor :
      *                               if the CPU is present
      */
   public:
-    CPLDCRCMonitor(boost::asio::io_service& io,
+    CPLDCRCMonitor(boost::asio::io_context& io,
                    std::shared_ptr<sdbusplus::asio::connection> conn,
                    const std::string& signalName, const size_t cpuNum,
                    const std::string& cpuPresenceName) :
