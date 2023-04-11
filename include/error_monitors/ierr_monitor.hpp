@@ -82,6 +82,7 @@ class IERRMonitor :
     bool checkIERRCPUs()
     {
         bool cpuIERRFound = false;
+#ifdef LIBPECI
         for (size_t cpu = 0, addr = MIN_CLIENT_ADDR; addr <= MAX_CLIENT_ADDR;
              cpu++, addr++)
         {
@@ -300,6 +301,7 @@ class IERRMonitor :
                 }
             }
         }
+#endif
         return cpuIERRFound;
     }
 

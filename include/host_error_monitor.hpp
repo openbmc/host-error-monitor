@@ -14,7 +14,11 @@
 // limitations under the License.
 */
 #pragma once
+#ifdef LIBPECI
 #include <peci.h>
+#else
+#define MAX_CPUS 8
+#endif
 
 #include <sdbusplus/asio/object_server.hpp>
 
@@ -97,6 +101,7 @@ void startCrashdumpAndRecovery(
         "com.intel.crashdump.Stored", "GenerateStoredLog", triggerType);
 }
 
+#ifdef LIBPECI
 static inline bool peciError(EPECIStatus peciStatus, uint8_t cc)
 {
     return (
@@ -111,6 +116,7 @@ static void printPECIError(const std::string& reg, const size_t addr,
               << addr << ". Error: " << peciStatus << ": cc: 0x" << std::hex
               << cc << "\n";
 }
+#endif
 
 static void beep(std::shared_ptr<sdbusplus::asio::connection> conn,
                  const uint8_t& beepPriority)
@@ -133,6 +139,7 @@ static void checkErrPinCPUs(const size_t errPin,
                             std::bitset<MAX_CPUS>& errPinCPUs)
 {
     errPinCPUs.reset();
+#ifdef LIBPECI
     for (size_t cpu = 0, addr = MIN_CLIENT_ADDR; addr <= MAX_CLIENT_ADDR;
          cpu++, addr++)
     {
@@ -194,6 +201,7 @@ static void checkErrPinCPUs(const size_t errPin,
             }
         }
     }
+#endif
 }
 
 } // namespace host_error_monitor
