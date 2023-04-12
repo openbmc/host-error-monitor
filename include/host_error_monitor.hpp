@@ -24,12 +24,13 @@
 
 #include <bitset>
 #include <iostream>
+#include <optional>
 
 namespace host_error_monitor
 {
 using Association = std::tuple<std::string, std::string, std::string>;
 
-bool hostIsOff();
+void checkHostState(std::function<void(std::optional<bool>)> callback);
 
 void startPowerCycle(std::shared_ptr<sdbusplus::asio::connection> conn)
 {
