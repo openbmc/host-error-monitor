@@ -87,15 +87,6 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
             std::cerr << "Checking " << signalName << " state\n";
         }
 
-        if (hostIsOff())
-        {
-            if constexpr (debug)
-            {
-                std::cerr << "Host is off\n";
-            }
-            return false;
-        }
-
         return (line.get_value() == static_cast<int>(assertValue));
     }
 
@@ -179,44 +170,48 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
 
         flushEvents();
 
-        if (!asserted())
-        {
-            if constexpr (debug)
+        checkHostState([this](bool hostOn) {
+            if (!asserted() || !hostOn)
             {
-                std::cerr << signalName << " not asserted\n";
-            }
-
-            deassertHandler();
-            waitForEvent();
-            return;
-        }
-        if constexpr (debug)
-        {
-            std::cerr << signalName << " asserted\n";
-        }
-
-        if (std::chrono::steady_clock::now() > timeoutTime)
-        {
-            assertHandler();
-            waitForEvent();
-            return;
-        }
-
-        pollingTimer.expires_after(std::chrono::milliseconds(pollingTimeMs));
-        pollingTimer.async_wait([this](const boost::system::error_code ec) {
-            if (ec)
-            {
-                // operation_aborted is expected if timer is canceled before
-                // completion.
-                if (ec != boost::asio::error::operation_aborted)
+                if constexpr (debug)
                 {
-                    std::cerr << signalName
-                              << " polling async_wait failed: " << ec.message()
-                              << "\n";
+                    std::cerr << signalName << " not asserted\n";
                 }
+
+                deassertHandler();
+                waitForEvent();
                 return;
             }
-            poll();
+            if constexpr (debug)
+            {
+                std::cerr << signalName << " asserted\n";
+            }
+
+            if (std::chrono::steady_clock::now() > timeoutTime)
+            {
+                assertHandler();
+                waitForEvent();
+                return;
+            }
+
+            pollingTimer.expires_after(
+                std::chrono::milliseconds(pollingTimeMs));
+            pollingTimer.async_wait([this](const boost::system::error_code ec) {
+                if (ec)
+                {
+                    // operation_aborted is expected if timer is canceled before
+                    // completion.
+                    if (ec != boost::asio::error::operation_aborted)
+                    {
+                        std::cerr
+                            << signalName
+                            << " polling async_wait failed: " << ec.message()
+                            << "\n";
+                    }
+                    return;
+                }
+                poll();
+            });
         });
     }
 
