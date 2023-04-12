@@ -89,12 +89,21 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
     {
         if (assertEvent)
         {
-            if constexpr (debug)
-            {
-                std::cerr << signalName << " asserted\n";
-            }
+            checkHostState([this](bool hostOn) {
+                if constexpr (debug)
+                {
+                    std::cerr << signalName << " asserted"
+                              << (hostOn ? "" : " but host is off, ignoring")
+                              << "\n";
+                }
 
-            assertHandler();
+                if (!hostOn)
+                {
+                    return;
+                }
+
+                assertHandler();
+            });
         }
         else
         {
