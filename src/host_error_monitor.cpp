@@ -20,6 +20,7 @@
 #include <sdbusplus/asio/object_server.hpp>
 
 #include <iostream>
+#include <optional>
 #include <variant>
 
 namespace host_error_monitor
@@ -27,45 +28,33 @@ namespace host_error_monitor
 static boost::asio::io_context io;
 static std::shared_ptr<sdbusplus::asio::connection> conn;
 
-static bool hostOff = true;
-bool hostIsOff()
-{
-    return hostOff;
-}
-
 static void init()
 {
-    static bool initialized = false;
-
-    if (!initialized)
+    if (!error_monitors::startMonitors(io, conn))
     {
-        initialized = true;
-        if (!error_monitors::startMonitors(io, conn))
-        {
-            throw std::runtime_error("Failed to start signal monitors");
-        }
+        throw std::runtime_error("Failed to start signal monitors");
     }
 }
-static void initializeHostState()
-{
-    // Get the current host state to prepare to start the signal monitors
-    conn->async_method_call(
-        [](boost::system::error_code ec,
-           const std::variant<std::string>& property) {
-            if (ec)
-            {
-                return;
-            }
-            const std::string* state = std::get_if<std::string>(&property);
-            if (state == nullptr)
-            {
-                std::cerr << "Unable to read host state value\n";
-                return;
-            }
-            hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
 
-            // Now we have the host state, we can init if needed
-            init();
+void checkHostState(std::function<void(std::optional<bool>)> callback)
+{
+    // Get the current host state and pass it into the provided callback
+    conn->async_method_call(
+        [callback](boost::system::error_code ec,
+                   const std::variant<std::string>& property) {
+            std::optional<bool> status = std::nullopt;
+            if (!ec)
+            {
+                const std::string* state = std::get_if<std::string>(&property);
+                if (state == nullptr)
+                {
+                    std::cerr << "Unable to read host state value\n";
+                    return;
+                }
+                status = *state != "xyz.openbmc_project.State.Host.HostState.Off";
+            }
+
+            callback(status);
         },
         "xyz.openbmc_project.State.Host", "/xyz/openbmc_project/state/host0",
         "org.freedesktop.DBus.Properties", "Get",
@@ -105,12 +94,7 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
                 return;
             }
 
-            hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
-
-            // Now we have the host state, we can init if needed
-            init();
-
-            if (!hostOff)
+            if (*state != "xyz.openbmc_project.State.Host.HostState.Off")
             {
                 // Notify error monitors when the host turns on
                 error_monitors::sendHostOn();
@@ -131,12 +115,14 @@ int main(int argc, char* argv[])
     sdbusplus::asio::object_server server =
         sdbusplus::asio::object_server(host_error_monitor::conn);
 
+    boost::asio::post(host_error_monitor::io, []() {
+        // Initialize the signal monitors
+        host_error_monitor::init();
+    });
+
     // Start tracking host state
     std::shared_ptr<sdbusplus::bus::match::match> hostStateMonitor =
         host_error_monitor::startHostStateMonitor();
-
-    // Initialize the signal monitors
-    host_error_monitor::initializeHostState();
 
     host_error_monitor::io.run();
 
