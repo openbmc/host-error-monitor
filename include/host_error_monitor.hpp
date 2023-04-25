@@ -95,6 +95,13 @@ void startCrashdumpAndRecovery(
         [](boost::system::error_code ec) {
             if (ec)
             {
+                if (ec.value() == boost::system::errc::device_or_resource_busy)
+                {
+                    std::cerr << "Crashdump already in progress. Waiting for "
+                                 "completion signal\n";
+                    return;
+                }
+
                 std::cerr << "failed to start Crashdump\n";
             }
         },
