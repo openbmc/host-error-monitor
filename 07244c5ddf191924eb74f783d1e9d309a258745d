@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9835c143_fbcbff3a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-04-27T18:30:37Z",
+      "side": 1,
+      "message": "This will also suppress valid signals such as CPU Thermtrip where the hardware immediately shuts down but we still need to log the event.  So, I don\u0027t think this is a blanket filter that can apply to all signals.\n\nCan the offending signal monitors be updated individually to check host state before logging?\n\nI have also been working with my hardware team to fix these bad signals over time, so this is less of an issue.  If that is a possibility, it has helped a lot.",
+      "revId": "07244c5ddf191924eb74f783d1e9d309a258745d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
