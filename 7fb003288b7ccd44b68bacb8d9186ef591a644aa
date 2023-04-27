@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2af4e841_f25a9153",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-04-27T16:36:54Z",
+      "side": 1,
+      "message": "Overall it\u0027s looking good.  The code is simpler and doesn\u0027t seem to be impacted by D-Bus performance in my testing.\n\nIn my testing, I ran into a strange D-Bus issue and a startup order issue.  But once we work through those, everything looks good on my system.",
+      "revId": "7fb003288b7ccd44b68bacb8d9186ef591a644aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "93cc9165_13fd0ffe",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-04-27T16:36:54Z",
+      "side": 1,
+      "message": "I\u0027m running into an issue here if host-error-monitor starts before power-control.  I think what happens is it returns here without calling the callback below.\n\nThen in base_gpio_poll_monitor, since the callback isn\u0027t called, it doesn\u0027t execute either the `waitForEvent()` or `poll()` calls, which I think leaves the signal monitor in a dead state.\n\nI\u0027m not sure the best way to handle it.  We could always call the callback with either a default or error value and handle it in the callback.  Or we could adjust in base_gpio_poll_monitor so that even if the callback doesn\u0027t run, the signal monitor keeps running.  What do you think?",
+      "revId": "7fb003288b7ccd44b68bacb8d9186ef591a644aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6e5e16ba_207d25dc",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-04-27T16:36:54Z",
+      "side": 1,
+      "message": "I am running into an issue here on my system where when a signal monitor that inherits base_gpio_poll_monitor is started, it tries to check the host state, but seems to hang waiting for D-Bus.\n\nI made the following change in a test build that seems to resolve the issue and mimics the current behavior where the signal monitors are initialized after io.run() starts:\n\n```\n-    // Initialize the signal monitors\n-    host_error_monitor::init();\n+    boost::asio::post(host_error_monitor::io, []() {\n+        // Initialize the signal monitors\n+        host_error_monitor::init();\n+    });\n```",
+      "revId": "7fb003288b7ccd44b68bacb8d9186ef591a644aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
