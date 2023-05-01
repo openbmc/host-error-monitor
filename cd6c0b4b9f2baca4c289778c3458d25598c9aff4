@@ -16,6 +16,24 @@
       "message": "This will still exit without calling the callback and leave the monitor in a dead state.  Should we call the callback in this case, too?",
       "revId": "cd6c0b4b9f2baca4c289778c3458d25598c9aff4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "746b5941_878a4019",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2023-05-01T21:00:35Z",
+      "side": 1,
+      "message": "Ah yeah, missed this other `return`...now fixed, thanks.",
+      "parentUuid": "9e086859_ed20b0cf",
+      "revId": "cd6c0b4b9f2baca4c289778c3458d25598c9aff4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
