@@ -89,6 +89,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "da9a0a01_ffb424a0",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-05-02T20:33:51Z",
+      "side": 1,
+      "message": "Hmm... I\u0027m still seeing it hang if I start power-control after host-error-monitor, so that didn\u0027t fix it. 😕\n\nWithout power-control, it gets a `No route to host` error. Everything seems to be fine until that error, then host-error-monitor just hangs waiting for the next call to checkHostState().\n\nHowever, while it\u0027s hung there, I can read the host state using `busctl`. I wonder if it\u0027s something in sdbusplus that is trying to protect host-error-monitor by blocking D-Bus to the same host after getting the \"No route\" error.\n\nDo you see this issue if you start power-control after host-error-monitor? Or stop and start power-control while host-error-monitor is running?",
+      "parentUuid": "6a69b48d_504ca051",
+      "revId": "7fb003288b7ccd44b68bacb8d9186ef591a644aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6e5e16ba_207d25dc",
