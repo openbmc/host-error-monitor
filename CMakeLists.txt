@@ -11,6 +11,7 @@ option (HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT "Enable crashdump on SMI Timeout."
 
 option (YOCTO "Enable Building in Yocto" OFF)
 option (LIBPECI "Enable use of old peci driver API via libpeci" OFF)
+option (CRASHDUMP "Enable use of the Intel Crashdump service" OFF)
 
 if (LIBPECI AND NOT YOCTO)
     add_dependencies (host-error-monitor libpeci)
