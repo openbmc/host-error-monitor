@@ -109,6 +109,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "0af1ef28_09c430b6",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2023-05-16T19:43:06Z",
+      "side": 1,
+      "message": "I\u0027m having trouble reproducing the problem you\u0027re seeing...if I stop power-control and then start host-error-monitor I don\u0027t see any  error messages, and I\u0027ve got an ierr_monitor instance on a CATERR line, so there\u0027s definitely at least one polled monitor in the mix; if I then start power-control and power on the host, using the gpio-mockup driver to trigger the CATERR signal I see the expected response from host-error-monitor.  Just in case I\u0027m missing something, could you provide a more detailed step-by-step description of exactly what you\u0027re doing to reproduce the problem?",
+      "parentUuid": "da9a0a01_ffb424a0",
+      "revId": "7fb003288b7ccd44b68bacb8d9186ef591a644aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "6e5e16ba_207d25dc",
         "filename": "src/host_error_monitor.cpp",
         "patchSetId": 3
