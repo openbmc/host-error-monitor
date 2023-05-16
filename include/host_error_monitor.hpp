@@ -68,6 +68,7 @@ void startCrashdumpAndRecovery(
     std::shared_ptr<sdbusplus::asio::connection> conn, bool recoverSystem,
     const std::string& triggerType)
 {
+#ifdef CRASHDUMP
     static bool recover;
     recover = recoverSystem;
     std::cerr << "Starting crashdump\n";
@@ -99,6 +100,7 @@ void startCrashdumpAndRecovery(
         },
         "com.intel.crashdump", "/com/intel/crashdump",
         "com.intel.crashdump.Stored", "GenerateStoredLog", triggerType);
+#endif
 }
 
 #ifdef LIBPECI
