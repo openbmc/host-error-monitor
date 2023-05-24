@@ -145,6 +145,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "20df557f_798ed4b4",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-05-24T20:04:52Z",
+      "side": 1,
+      "message": "On start-up, the ERR2 mockup is asserted, so the monitor is polling:\n```\nMay 24 19:43:56 bmc-maca4bf018cdac8 host-error-monitor[305]: Polling gpio-mockup-A-2\nMay 24 19:43:56 bmc-maca4bf018cdac8 host-error-monitor[305]: Flushing gpio-mockup-A-2 events\nMay 24 19:43:56 bmc-maca4bf018cdac8 host-error-monitor[305]: JMB: In checkHostState\nMay 24 19:43:56 bmc-maca4bf018cdac8 host-error-monitor[305]: JMB: In checkHostState handler\nMay 24 19:43:56 bmc-maca4bf018cdac8 host-error-monitor[305]: Host is xyz.openbmc_project.State.Host.HostState.Running\nMay 24 19:43:56 bmc-maca4bf018cdac8 host-error-monitor[305]: Checking gpio-mockup-A-2 state\nMay 24 19:43:56 bmc-maca4bf018cdac8 host-error-monitor[305]: Checking gpio-mockup-A-2 state\nMay 24 19:43:56 bmc-maca4bf018cdac8 host-error-monitor[305]: gpio-mockup-A-2 asserted\n```\n\nI stop power-control with `systemctl stop xyz.openbmc_project.Chassis.Control.Power@0` and get this:\n```\nMay 24 19:44:17 bmc-maca4bf018cdac8 host-error-monitor[305]: Polling gpio-mockup-A-2\nMay 24 19:44:17 bmc-maca4bf018cdac8 host-error-monitor[305]: Flushing gpio-mockup-A-2 events\nMay 24 19:44:17 bmc-maca4bf018cdac8 host-error-monitor[305]: JMB: In checkHostState\nMay 24 19:44:17 bmc-maca4bf018cdac8 host-error-monitor[305]: JMB: In checkHostState handler\nMay 24 19:44:17 bmc-maca4bf018cdac8 host-error-monitor[305]: JMB: Error getting host state: No route to host [generic:113]\nMay 24 19:44:17 bmc-maca4bf018cdac8 host-error-monitor[305]: Checking gpio-mockup-A-2 state\nMay 24 19:44:17 bmc-maca4bf018cdac8 host-error-monitor[305]: Checking gpio-mockup-A-2 state\nMay 24 19:44:17 bmc-maca4bf018cdac8 host-error-monitor[305]: gpio-mockup-A-2 not asserted\nMay 24 19:44:17 bmc-maca4bf018cdac8 host-error-monitor[305]: Checking gpio-mockup-A-2 state\nMay 24 19:44:17 bmc-maca4bf018cdac8 host-error-monitor[305]: Wait for gpio-mockup-A-2\n```\n\nThis looks correct so far and puts the ERR2 monitor back into wait mode after it fails to find the current host state.\n\nI then start power-control again with `systemctl start xyz.openbmc_project.Chassis.Control.Power@0` and get this:\n```\nMay 24 19:45:47 bmc-maca4bf018cdac8 host-error-monitor[305]: Polling gpio-mockup-A-2\nMay 24 19:45:47 bmc-maca4bf018cdac8 host-error-monitor[305]: Flushing gpio-mockup-A-2 events\nMay 24 19:45:47 bmc-maca4bf018cdac8 host-error-monitor[305]: JMB: In checkHostState\n```\n\nIt correctly starts polling again, but when it tries to get the host state from D-Bus, it just hangs there.\n\nIf I stop power-control again, I get\n```\nroot@bmc-maca4bf018cdac8:~# May 24 20:03:22 bmc-maca4bf018cdac8 host-error-monitor[305]: JMB: In checkHostState handler\nMay 24 20:03:22 bmc-maca4bf018cdac8 host-error-monitor[305]: JMB: Error getting host state: Connection timed out [generic:110]\nMay 24 20:03:22 bmc-maca4bf018cdac8 host-error-monitor[305]: Checking gpio-mockup-A-2 state\nMay 24 20:03:22 bmc-maca4bf018cdac8 host-error-monitor[305]: Checking gpio-mockup-A-2 state\nMay 24 20:03:22 bmc-maca4bf018cdac8 host-error-monitor[305]: gpio-mockup-A-2 not asserted\nMay 24 20:03:22 bmc-maca4bf018cdac8 host-error-monitor[305]: Checking gpio-mockup-A-2 state\nMay 24 20:03:22 bmc-maca4bf018cdac8 host-error-monitor[305]: Wait for gpio-mockup-A-2\n```\n\nWhere it finally returns to the handler with a connection timeout.",
+      "parentUuid": "69ed05c2_ab60b68e",
+      "revId": "7fb003288b7ccd44b68bacb8d9186ef591a644aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "6e5e16ba_207d25dc",
         "filename": "src/host_error_monitor.cpp",
         "patchSetId": 3
