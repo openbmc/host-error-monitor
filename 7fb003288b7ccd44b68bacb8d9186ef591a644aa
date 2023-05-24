@@ -127,6 +127,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "69ed05c2_ab60b68e",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-05-24T19:58:21Z",
+      "side": 1,
+      "message": "For setup, I enable gpio-mockup in an Err2Monitor and add these debug prints:\n```\ndiff --git a/include/error_monitors/base_gpio_poll_monitor.hpp b/include/error_monitors/base_gpio_poll_monitor.hpp\nindex 6d6d7c8..b62e0ad 100644\n--- a/include/error_monitors/base_gpio_poll_monitor.hpp\n+++ b/include/error_monitors/base_gpio_poll_monitor.hpp\n@@ -25,7 +25,7 @@\n\n namespace host_error_monitor::base_gpio_poll_monitor\n {\n-static constexpr bool debug \u003d false;\n+static constexpr bool debug \u003d true;\n\n enum class AssertValue\n {\ndiff --git a/src/host_error_monitor.cpp b/src/host_error_monitor.cpp\nindex 29a0f0b..d01223d 100644\n--- a/src/host_error_monitor.cpp\n+++ b/src/host_error_monitor.cpp\n@@ -38,11 +38,13 @@ static void init()\n\n void checkHostState(std::function\u003cvoid(std::optional\u003cbool\u003e)\u003e callback)\n {\n+    std::cerr \u003c\u003c \"JMB: In checkHostState\\n\";\n     // Get the current host state and pass it into the provided callback\n     conn-\u003easync_method_call(\n         [callback](boost::system::error_code ec,\n                    const std::variant\u003cstd::string\u003e\u0026 property) {\n             std::optional\u003cbool\u003e status \u003d std::nullopt;\n+            std::cerr \u003c\u003c \"JMB: In checkHostState handler\\n\";\n             if (!ec)\n             {\n                 const std::string* state \u003d std::get_if\u003cstd::string\u003e(\u0026property);\n@@ -55,6 +57,12 @@ void checkHostState(std::function\u003cvoid(std::optional\u003cbool\u003e)\u003e callback)\n                     status \u003d *state !\u003d\n                              \"xyz.openbmc_project.State.Host.HostState.Off\";\n                 }\n+                std::cerr \u003c\u003c \"Host is \" \u003c\u003c *state \u003c\u003c \"\\n\";\n+            }\n+            else\n+            {\n+                std::cerr \u003c\u003c \"JMB: Error getting host state: \" \u003c\u003c ec.what()\n+                          \u003c\u003c \"\\n\";\n             }\n\n             callback(status);\n```",
+      "parentUuid": "0af1ef28_09c430b6",
+      "revId": "7fb003288b7ccd44b68bacb8d9186ef591a644aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "6e5e16ba_207d25dc",
         "filename": "src/host_error_monitor.cpp",
         "patchSetId": 3
