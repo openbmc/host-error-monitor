@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8728282a_45b239c0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-06-27T15:03:00Z",
+      "side": 1,
+      "message": "No feedback after a few weeks, so moving forward with +2.",
+      "revId": "1c0d047713fe603fecebd42cf4c21cf98a31e44a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
