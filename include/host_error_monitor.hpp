@@ -78,7 +78,7 @@ void startCrashdumpAndRecovery(
     {
         crashdumpCompleteMatch = std::make_shared<sdbusplus::bus::match::match>(
             *conn,
-            "type='signal',interface='com.intel.crashdump.Stored',member='"
+            "type='signal',interface='com.intel.crashdump',member='"
             "CrashdumpComplete'",
             [conn](sdbusplus::message::message& msg) {
                 std::cerr << "Crashdump completed\n";
