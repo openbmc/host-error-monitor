@@ -40,7 +40,7 @@ class Err2Monitor :
             [this](boost::system::error_code ec,
                    const std::variant<bool>& property) {
                 // Default to no reset after Crashdump
-                bool reset = false;
+                RecoveryType recovery = RecoveryType::noRecovery;
                 if (!ec)
                 {
                     const bool* resetPtr = std::get_if<bool>(&property);
@@ -48,12 +48,12 @@ class Err2Monitor :
                     {
                         std::cerr << "Unable to read reset on ERR2 value\n";
                     }
-                    else
+                    else if (*resetPtr)
                     {
-                        reset = *resetPtr;
+                        recovery = RecoveryType::warmReset;
                     }
                 }
-                startCrashdumpAndRecovery(conn, reset, "ERR2 Timeout");
+                startCrashdumpAndRecovery(conn, recovery, "ERR2 Timeout");
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
