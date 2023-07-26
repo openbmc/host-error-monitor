@@ -64,13 +64,41 @@ void startWarmReset(std::shared_ptr<sdbusplus::asio::connection> conn)
             "xyz.openbmc_project.State.Host.Transition.ForceWarmReboot"});
 }
 
+enum class RecoveryType
+{
+    noRecovery,
+    powerCycle,
+    warmReset,
+};
+
+static inline void
+    handleRecovery(RecoveryType recovery, boost::asio::io_context& io,
+                   std::shared_ptr<sdbusplus::asio::connection> conn)
+{
+    switch (recovery)
+    {
+        case RecoveryType::noRecovery:
+            std::cerr << "Recovery is disabled. Leaving the system "
+                         "in the failed state.\n";
+            break;
+        case RecoveryType::powerCycle:
+            std::cerr << "Recovering the system with a power cycle\n";
+            startPowerCycle(conn);
+            break;
+        case RecoveryType::warmReset:
+            std::cerr << "Recovering the system with a warm reset\n";
+            startWarmReset(conn);
+            break;
+    }
+}
+
 void startCrashdumpAndRecovery(
-    std::shared_ptr<sdbusplus::asio::connection> conn, bool recoverSystem,
-    const std::string& triggerType)
+    std::shared_ptr<sdbusplus::asio::connection> conn,
+    RecoveryType requestedRecovery, const std::string& triggerType)
 {
 #ifdef CRASHDUMP
-    static bool recover;
-    recover = recoverSystem;
+    static RecoveryType recovery;
+    recovery = requestedRecovery;
     std::cerr << "Starting crashdump\n";
     static std::shared_ptr<sdbusplus::bus::match::match> crashdumpCompleteMatch;
 
@@ -82,11 +110,7 @@ void startCrashdumpAndRecovery(
             "CrashdumpComplete'",
             [conn](sdbusplus::message::message& msg) {
                 std::cerr << "Crashdump completed\n";
-                if (recover)
-                {
-                    std::cerr << "Recovering the system\n";
-                    startWarmReset(conn);
-                }
+                handleRecovery(recovery, io, conn);
                 crashdumpCompleteMatch.reset();
             });
     }

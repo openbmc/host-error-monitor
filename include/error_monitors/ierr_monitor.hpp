@@ -368,7 +368,7 @@ class IERRMonitor :
             [this](boost::system::error_code ec,
                    const std::variant<bool>& property) {
                 // Default to no reset after Crashdump
-                bool reset = false;
+                RecoveryType recovery = RecoveryType::noRecovery;
                 if (!ec)
                 {
                     const bool* resetPtr = std::get_if<bool>(&property);
@@ -376,12 +376,12 @@ class IERRMonitor :
                     {
                         std::cerr << "Unable to read reset on CATERR value\n";
                     }
-                    else
+                    else if (*resetPtr)
                     {
-                        reset = *resetPtr;
+                        recovery = RecoveryType::warmReset;
                     }
                 }
-                startCrashdumpAndRecovery(conn, reset, "IERR");
+                startCrashdumpAndRecovery(conn, recovery, "IERR");
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
