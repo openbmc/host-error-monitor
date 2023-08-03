@@ -35,15 +35,15 @@ enum class AssertValue
 
 class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
 {
-    AssertValue assertValue;
-    size_t pollingTimeMs;
-    size_t timeoutMs;
-
     boost::asio::steady_timer pollingTimer;
     std::chrono::steady_clock::time_point timeoutTime;
 
     gpiod::line line;
     boost::asio::posix::stream_descriptor event;
+
+    AssertValue assertValue;
+    size_t pollingTimeMs;
+    size_t timeoutMs;
 
     virtual void logEvent()
     {}
@@ -127,7 +127,7 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
             {
                 line.event_read();
             }
-            catch (std::system_error)
+            catch (std::system_error&)
             {
                 break;
             }

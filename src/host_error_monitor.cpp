@@ -119,7 +119,7 @@ static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
 }
 } // namespace host_error_monitor
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
     // setup connection to dbus
     host_error_monitor::conn =

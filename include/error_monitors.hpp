@@ -36,8 +36,9 @@ bool checkMonitors()
 }
 
 // Start the signal monitors
-bool startMonitors(boost::asio::io_context& io,
-                   std::shared_ptr<sdbusplus::asio::connection> conn)
+bool startMonitors(
+    [[maybe_unused]] boost::asio::io_context& io,
+    [[maybe_unused]] std::shared_ptr<sdbusplus::asio::connection> conn)
 {
     // smiMonitor =
     // std::make_unique<host_error_monitor::smi_monitor::SMIMonitor>(

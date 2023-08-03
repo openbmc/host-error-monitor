@@ -34,10 +34,10 @@ enum class AssertValue
 
 class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
 {
-    AssertValue assertValue;
-
     gpiod::line line;
     boost::asio::posix::stream_descriptor event;
+
+    AssertValue assertValue;
 
     virtual void logEvent()
     {}
