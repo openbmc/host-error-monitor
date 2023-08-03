@@ -1,0 +1,13 @@
+option(
+    'libpeci',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Enable use of old peci driver API via libpeci',
+)
+
+option(
+    'crashdump',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Enable use of the Intel Crashdump service',
+)
