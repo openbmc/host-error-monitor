@@ -108,7 +108,7 @@ void startCrashdumpAndRecovery(
             *conn,
             "type='signal',interface='com.intel.crashdump',member='"
             "CrashdumpComplete'",
-            [conn](sdbusplus::message::message& msg) {
+            [conn](sdbusplus::message::message& /*msg*/) {
                 std::cerr << "Crashdump completed\n";
                 handleRecovery(recovery, conn);
                 crashdumpCompleteMatch.reset();
@@ -151,8 +151,9 @@ static void printPECIError(const std::string& reg, const size_t addr,
 }
 #endif
 
-static void beep(std::shared_ptr<sdbusplus::asio::connection> conn,
-                 const uint8_t& beepPriority)
+[[maybe_unused]] static void
+    beep(std::shared_ptr<sdbusplus::asio::connection> conn,
+         const uint8_t& beepPriority)
 {
     conn->async_method_call(
         [](boost::system::error_code ec) {
@@ -168,8 +169,8 @@ static void beep(std::shared_ptr<sdbusplus::asio::connection> conn,
         "xyz.openbmc_project.BeepCode", "Beep", uint8_t(beepPriority));
 }
 
-static void checkErrPinCPUs(const size_t errPin,
-                            std::bitset<MAX_CPUS>& errPinCPUs)
+[[maybe_unused]] static void checkErrPinCPUs(const size_t errPin,
+                                             std::bitset<MAX_CPUS>& errPinCPUs)
 {
     errPinCPUs.reset();
 #ifdef LIBPECI
