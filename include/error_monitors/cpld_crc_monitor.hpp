@@ -55,8 +55,9 @@ class CPLDCRCMonitor :
         // Request GPIO input
         try
         {
-            cpuPresenceLine.request(
-                {"host-error-monitor", gpiod::line_request::DIRECTION_INPUT});
+            cpuPresenceLine.request({"host-error-monitor",
+                                     gpiod::line_request::DIRECTION_INPUT,
+                                     gpiod::line_request::FLAG_ACTIVE_LOW});
         }
         catch (std::exception&)
         {
@@ -64,8 +65,7 @@ class CPLDCRCMonitor :
             return false;
         }
 
-        // CPU presence is low-assert
-        cpuPresent = !cpuPresenceLine.get_value();
+        cpuPresent = cpuPresenceLine.get_value();
 
         return true;
     }

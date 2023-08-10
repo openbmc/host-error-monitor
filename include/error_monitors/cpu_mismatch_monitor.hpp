@@ -53,8 +53,9 @@ class CPUMismatchMonitor : public host_error_monitor::base_monitor::BaseMonitor
         // Request GPIO input
         try
         {
-            cpuMismatchLine.request(
-                {"host-error-monitor", gpiod::line_request::DIRECTION_INPUT});
+            cpuMismatchLine.request({"host-error-monitor",
+                                     gpiod::line_request::DIRECTION_INPUT,
+                                     0}); // 0 indicates ACTIVE_HIGH
         }
         catch (std::exception&)
         {
@@ -72,7 +73,7 @@ class CPUMismatchMonitor : public host_error_monitor::base_monitor::BaseMonitor
             std::cerr << "Checking " << signalName << " state\n";
         }
 
-        return (cpuMismatchLine.get_value() == 1);
+        return (cpuMismatchLine.get_value());
     }
 
     void cpuMismatchAssertHandler()
