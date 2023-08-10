@@ -16,6 +16,24 @@
       "message": "why not remove the parameters all together?",
       "revId": "01a87c48221adfa89da7bc755187bfb0e454b339",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f740a813_5e813bcb",
+        "filename": "src/host_error_monitor.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-08-10T20:17:45Z",
+      "side": 1,
+      "message": "I based this on Ed\u0027s comment here: https://gerrit.openbmc.org/c/openbmc/peci-pcie/+/65611/comment/dc86dd1d_18135782/",
+      "parentUuid": "a48fe22f_f33ff7e8",
+      "revId": "01a87c48221adfa89da7bc755187bfb0e454b339",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
