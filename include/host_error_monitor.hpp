@@ -72,7 +72,7 @@ enum class RecoveryType
 };
 
 static inline void
-    handleRecovery(RecoveryType recovery, boost::asio::io_context& io,
+    handleRecovery(RecoveryType recovery,
                    std::shared_ptr<sdbusplus::asio::connection> conn)
 {
     switch (recovery)
@@ -110,7 +110,7 @@ void startCrashdumpAndRecovery(
             "CrashdumpComplete'",
             [conn](sdbusplus::message::message& msg) {
                 std::cerr << "Crashdump completed\n";
-                handleRecovery(recovery, io, conn);
+                handleRecovery(recovery, conn);
                 crashdumpCompleteMatch.reset();
             });
     }
