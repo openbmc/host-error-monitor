@@ -35,7 +35,6 @@ enum class AssertValue
 class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
 {
     AssertValue assertValue;
-    int assertEvent;
 
     gpiod::line line;
     boost::asio::posix::stream_descriptor event;
@@ -54,8 +53,11 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
 
         try
         {
-            line.request(
-                {"host-error-monitor", gpiod::line_request::EVENT_BOTH_EDGES});
+            line.request({"host-error-monitor",
+                          gpiod::line_request::EVENT_BOTH_EDGES,
+                          assertValue == AssertValue::highAssert
+                              ? 0
+                              : gpiod::line_request::FLAG_ACTIVE_LOW});
         }
         catch (std::exception&)
         {
@@ -82,7 +84,7 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
             std::cerr << "Checking " << signalName << " state\n";
         }
 
-        return (line.get_value() == static_cast<int>(assertValue));
+        return (line.get_value());
     }
 
     void checkEvent(bool assertEvent)
@@ -146,7 +148,10 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
 
                 gpiod::line_event gpioLineEvent = line.event_read();
 
-                checkEvent(gpioLineEvent.event_type == assertEvent);
+                // With FLAG_ACTIVE_LOW enabled, both active-high and active-low
+                // signals have a RISING_EDGE event when asserted
+                checkEvent(gpioLineEvent.event_type ==
+                           gpiod::line_event::RISING_EDGE);
                 waitForEvent();
             });
     }
@@ -169,10 +174,6 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
         BaseMonitor(io, conn, signalName),
         event(io), assertValue(assertValue)
     {
-        assertEvent = (assertValue == AssertValue::lowAssert)
-                          ? gpiod::line_event::FALLING_EDGE
-                          : gpiod::line_event::RISING_EDGE;
-
         if (!requestEvents())
         {
             return;

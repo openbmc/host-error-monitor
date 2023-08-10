@@ -59,8 +59,11 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
 
         try
         {
-            line.request(
-                {"host-error-monitor", gpiod::line_request::EVENT_BOTH_EDGES});
+            line.request({"host-error-monitor",
+                          gpiod::line_request::EVENT_BOTH_EDGES,
+                          assertValue == AssertValue::highAssert
+                              ? 0
+                              : gpiod::line_request::FLAG_ACTIVE_LOW});
         }
         catch (std::exception&)
         {
@@ -96,7 +99,7 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
             return false;
         }
 
-        return (line.get_value() == static_cast<int>(assertValue));
+        return (line.get_value());
     }
 
   public:
