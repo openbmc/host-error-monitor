@@ -1,0 +1,7 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: Jason Bills <jason.m.bills@linux.intel.com>
+Submitted-by: Jason Bills <jason.m.bills@linux.intel.com>
+Submitted-at: Mon, 21 Aug 2023 20:34:19 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/host-error-monitor/+/65871
+Project: openbmc/host-error-monitor
+Branch: refs/heads/master
