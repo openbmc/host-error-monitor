@@ -299,6 +299,10 @@ class IERRMonitor :
                     }
                     break;
                 }
+                default:
+                    std::cerr << "No special IERR handling provided for model "
+                              << static_cast<int>(model) << "\n";
+                    break;
             }
         }
 #endif
@@ -454,7 +458,7 @@ class IERRMonitor :
                 resp = requested;
                 return 1;
             },
-            [this](std::size_t& resp) { return getTimeoutMs(); });
+            [this](std::size_t& /*resp*/) { return getTimeoutMs(); });
         hostErrorTimeoutIface->initialize();
 
         std::string objectName = customName.empty() ? signalName : customName;
