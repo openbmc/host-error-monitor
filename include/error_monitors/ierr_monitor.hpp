@@ -378,7 +378,7 @@ class IERRMonitor :
                     const bool* resetPtr = std::get_if<bool>(&property);
                     if (resetPtr == nullptr)
                     {
-                        std::cerr << "Unable to read reset on CATERR value\n";
+                        std::cerr << "Unable to read reset on IERR value\n";
                     }
                     else if (*resetPtr)
                     {
@@ -390,7 +390,7 @@ class IERRMonitor :
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
             "org.freedesktop.DBus.Properties", "Get",
-            "xyz.openbmc_project.Control.Processor.ErrConfig", "ResetOnCATERR");
+            "xyz.openbmc_project.Control.Processor.ErrConfig", "ResetOnIERR");
     }
 
     void deassertHandler() override
