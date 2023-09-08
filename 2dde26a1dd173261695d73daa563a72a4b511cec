@@ -22,6 +22,30 @@
       },
       "revId": "2dde26a1dd173261695d73daa563a72a4b511cec",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4f64d98c_b73668d3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-09-08T21:11:33Z",
+      "side": 1,
+      "message": "The other type is MCERR. Updated the commit message with that info.",
+      "parentUuid": "a6afcde4_999e8f97",
+      "range": {
+        "startLine": 9,
+        "startChar": 28,
+        "endLine": 9,
+        "endChar": 61
+      },
+      "revId": "2dde26a1dd173261695d73daa563a72a4b511cec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
