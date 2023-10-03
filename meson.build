@@ -30,7 +30,11 @@ systemd_system_unit_dir = systemd.get_variable(pkgconfig:
     'systemdsystemunitdir'
 )
 
-boost = dependency('boost', version: '>=1.82')
+boost = dependency('boost', version : '>=1.82.0', required : false, include_type: 'system')
+if not boost.found()
+  boost = subproject('boost', required: true).get_variable('boost_dep')
+  boost = boost.as_system('system')
+endif
 add_project_arguments(
   [
     '-DBOOST_ASIO_DISABLE_THREADS',
