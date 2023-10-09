@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "799425b9_dc4da80e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2023-10-09T21:29:57Z",
+      "side": 1,
+      "message": "I know essentially nothing about meson and wrap files and such, but I don\u0027t see anything *obviously* wrong here...just one minor formatting nitpick.",
+      "revId": "028bb0f1a96dcdc4d10da3f06a0b46119967867c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "856dff78_d70dede1",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2023-10-09T21:29:57Z",
+      "side": 1,
+      "message": "Nit: missing space between comma and `version`.",
+      "revId": "028bb0f1a96dcdc4d10da3f06a0b46119967867c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
