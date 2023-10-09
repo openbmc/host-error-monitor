@@ -61,13 +61,19 @@ if(get_option('libpeci').enabled())
   ]
 endif
 
+incs = include_directories('include')
+
 executable(
   'host-error-monitor',
   'src/host_error_monitor.cpp',
-  include_directories: include_directories('include'),
+  include_directories: incs,
   dependencies: deps,
   install: true,
   install_dir: bindir
 )
 
 subdir('service_files')
+
+if get_option('tests').enabled()
+    subdir('tests')
+endif

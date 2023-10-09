@@ -11,3 +11,10 @@ option(
     value: 'disabled',
     description: 'Enable use of the Intel Crashdump service',
 )
+
+option(
+    'tests',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Enable unit tests',
+)
