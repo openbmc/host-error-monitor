@@ -29,10 +29,17 @@ class Err2Monitor :
 {
     const static constexpr uint8_t beepCPUErr2 = 5;
 
+    std::shared_ptr<sdbusplus::asio::dbus_interface> associationERR2;
+
+    static const constexpr char* callbackMgrPath =
+        "/xyz/openbmc_project/CallbackManager";
+
     void assertHandler() override
     {
         host_error_monitor::err_pin_timeout_monitor::ErrPinTimeoutMonitor::
             assertHandler();
+
+        setLED();
 
         beep(conn, beepCPUErr2);
 
@@ -61,12 +68,51 @@ class Err2Monitor :
             "xyz.openbmc_project.Control.Processor.ErrConfig", "ResetOnERR2");
     }
 
+    void deassertHandler() override
+    {
+        ErrPinTimeoutMonitor::deassertHandler();
+
+        unsetLED();
+    }
+
+    void setLED()
+    {
+        std::vector<Association> associations;
+
+        associations.emplace_back(
+            "", "critical", "/xyz/openbmc_project/host_error_monitor/err2");
+        associations.emplace_back("", "critical", callbackMgrPath);
+
+        associationERR2->set_property("Associations", associations);
+    }
+
+    void unsetLED()
+    {
+        std::vector<Association> associations;
+
+        associations.emplace_back("", "", "");
+
+        associationERR2->set_property("Associations", associations);
+    }
+
   public:
     Err2Monitor(boost::asio::io_context& io,
                 std::shared_ptr<sdbusplus::asio::connection> conn,
                 const std::string& signalName) :
         host_error_monitor::err_pin_timeout_monitor::ErrPinTimeoutMonitor(
             io, conn, signalName, 2)
-    {}
+    {
+        // Associations interface for led status
+        std::vector<host_error_monitor::Association> associations;
+        associations.emplace_back("", "", "");
+
+        sdbusplus::asio::object_server server =
+            sdbusplus::asio::object_server(conn);
+        associationERR2 =
+            server.add_interface("/xyz/openbmc_project/host_error_monitor/err2",
+                                 "xyz.openbmc_project.Association.Definitions");
+        associationERR2->register_property("Associations", associations);
+        associationERR2->initialize();
+    }
 };
 } // namespace host_error_monitor::err2_monitor
