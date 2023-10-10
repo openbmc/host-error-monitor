@@ -33,6 +33,24 @@
       "message": "Nit: missing space between comma and `version`.",
       "revId": "028bb0f1a96dcdc4d10da3f06a0b46119967867c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9ba53977_e69c68e6",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2023-10-10T13:46:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "856dff78_d70dede1",
+      "revId": "028bb0f1a96dcdc4d10da3f06a0b46119967867c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
