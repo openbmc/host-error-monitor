@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e0b68d57_044ba5ab",
+        "filename": "tests/meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2023-10-18T02:05:39Z",
+      "side": 1,
+      "message": "Style nits:\n\n - other `if` conditions aren\u0027t parenthesized, I\u0027m guessing this one doesn\u0027t need to be either\n \n - indentation elsewhere is consistently 4 spaces per level, this drops to 2 after the first",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 18
+      },
+      "revId": "04d5fc4dd86aee7e812a484b67ce7f1e0c67f7cb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
