@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "74f9c9ea_c4b91bc9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2023-10-30T18:41:31Z",
+      "side": 1,
+      "message": "Another brick in the \"iostreams are an atrocity of API design\" wall...",
+      "revId": "bf81ccf8cb8f0ab4c54843b1e41e8c34731c6df8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
