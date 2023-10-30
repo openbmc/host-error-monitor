@@ -146,9 +146,11 @@ static inline bool peciError(EPECIStatus peciStatus, uint8_t cc)
 static void printPECIError(const std::string& reg, const size_t addr,
                            const EPECIStatus peciStatus, const size_t cc)
 {
+    std::ios_base::fmtflags originalFlags = std::cerr.flags();
     std::cerr << "Failed to read " << reg << " on CPU address " << std::dec
               << addr << ". Error: " << peciStatus << ": cc: 0x" << std::hex
               << cc << "\n";
+    std::cerr.flags(originalFlags);
 }
 #endif
 
