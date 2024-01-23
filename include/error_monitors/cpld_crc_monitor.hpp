@@ -36,10 +36,7 @@ class CPLDCRCMonitor :
         std::string cpuNumber = "CPU " + std::to_string(cpuNum);
         std::string msg = cpuNumber + " CPLD CRC error.";
 
-        sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                        LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.CPUError", "REDFISH_MESSAGE_ARGS=%s",
-                        msg.c_str(), NULL);
+        log_message(LOG_INFO, msg, "OpenBMC.0.1.CPUError", msg);
     }
 
     bool getCPUPresence(const std::string& cpuPresenceName)

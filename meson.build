@@ -20,6 +20,10 @@ if(get_option('crashdump').enabled())
   add_project_arguments('-DCRASHDUMP', language : 'cpp')
 endif
 
+if(get_option('send-to-logger').enabled())
+  add_project_arguments('-DSEND_TO_LOGGING_SERVICE', language : 'cpp')
+endif
+
 sdbusplus = dependency('sdbusplus')
 gpiodcxx = dependency('libgpiodcxx',
     default_options: ['bindings=cxx'],
@@ -46,12 +50,15 @@ add_project_arguments(
   language : 'cpp'
 )
 
+phosphor_dbus_interfaces = dependency('phosphor-dbus-interfaces')
+
 bindir = get_option('prefix') + '/' + get_option('bindir')
 
 deps = [
   boost,
   gpiodcxx,
   sdbusplus,
+  phosphor_dbus_interfaces,
 ]
 
 if(get_option('libpeci').enabled())

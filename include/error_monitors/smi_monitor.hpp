@@ -37,10 +37,8 @@ class SMIMonitor :
 
     void logEvent() override
     {
-        sd_journal_send("MESSAGE=HostError: SMI Timeout", "PRIORITY=%i",
-                        LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.CPUError", "REDFISH_MESSAGE_ARGS=%s",
-                        "SMI Timeout", NULL);
+        log_message(LOG_INFO, "SMI Timeout", "OpenBMC.0.1.CPUError",
+                    "SMI Timeout");
     }
 
     void assertHandler() override
