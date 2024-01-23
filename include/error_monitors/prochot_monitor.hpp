@@ -34,10 +34,8 @@ class ProchotMonitor :
         std::string msg = cpuNumber + " Prochot.";
         std::string redfishMsgArgs = cpuNumber;
 
-        sd_journal_send(
-            "MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i", LOG_ERR,
-            "REDFISH_MESSAGE_ID=%s", "OpenBMC.0.1.ComponentOverTemperature",
-            "REDFISH_MESSAGE_ARGS=%s", redfishMsgArgs.c_str(), NULL);
+        log_message(LOG_ERR, msg, "OpenBMC.0.1.ComponentOverTemperature",
+                    redfishMsgArgs);
     }
 
   public:

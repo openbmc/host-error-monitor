@@ -34,10 +34,7 @@ class MemThermtripMonitor :
         std::string cpuNumber = "CPU " + std::to_string(cpuNum);
         std::string msg = cpuNumber + " Memory Thermal trip.";
 
-        sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                        LOG_ERR, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.MemoryThermTrip",
-                        "REDFISH_MESSAGE_ARGS=%s", cpuNumber.c_str(), NULL);
+        log_message(LOG_ERR, msg, "OpenBMC.0.1.MemoryThermTrip", cpuNumber);
         assertInterface->set_property("Asserted", true);
     }
 

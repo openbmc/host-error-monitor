@@ -33,9 +33,8 @@ class PCHThermtripMonitor :
 
     void logEvent() override
     {
-        sd_journal_send("MESSAGE=HostError: SSB thermal trip", "PRIORITY=%i",
-                        LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.SsbThermalTrip", NULL);
+        log_message(LOG_INFO, "SSB thermal trip", "OpenBMC.0.1.SsbThermalTrip",
+                    "");
     }
 
     void assertHandler() override

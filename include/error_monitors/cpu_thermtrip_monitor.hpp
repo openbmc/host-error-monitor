@@ -37,12 +37,10 @@ class CPUThermtripMonitor :
 
     void cpuThermTripLog()
     {
-        std::string msg = "CPU " + std::to_string(cpuNum) + " thermal trip";
+        const std::string cpuS = std::to_string(cpuNum);
 
-        sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                        LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.CPUThermalTrip", "REDFISH_MESSAGE_ARGS=%d",
-                        cpuNum, NULL);
+        log_message(LOG_INFO, "CPU " + cpuS + " thermal trip",
+                    "OpenBMC.0.1.CPUThermalTrip", cpuS);
     }
 
     void deassertHandler() override
