@@ -32,10 +32,8 @@ class VRHotMonitor :
     {
         std::string msg = vrName + " Voltage Regulator Overheated.";
 
-        sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                        LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.VoltageRegulatorOverheated",
-                        "REDFISH_MESSAGE_ARGS=%s", vrName.c_str(), NULL);
+        log_message(LOG_INFO, msg, "OpenBMC.0.1.VoltageRegulatorOverheated",
+                    vrName);
     }
 
   public:

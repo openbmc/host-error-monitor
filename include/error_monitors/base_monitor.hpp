@@ -15,6 +15,7 @@
 */
 #pragma once
 #include <sdbusplus/asio/object_server.hpp>
+#include <xyz/openbmc_project/Logging/Entry/common.hpp>
 
 #include <iostream>
 
@@ -46,6 +47,30 @@ class BaseMonitor
     bool isValid()
     {
         return valid;
+    }
+
+  protected:
+    void log_message(int priority, const std::string& msg,
+                     const std::string& redfish_id,
+                     const std::string& redfish_msg)
+    {
+#ifdef SEND_TO_LOGGING_SERVICE
+        (void)redfish_id;
+        (void)redfish_msg;
+        using namespace sdbusplus::common::xyz::openbmc_project::logging;
+        sdbusplus::message_t newLogEntry = conn->new_method_call(
+            "xyz.openbmc_project.Logging", "/xyz/openbmc_project/logging",
+            "xyz.openbmc_project.Logging.Create", "Create");
+        const std::string logLevel =
+            Entry::convertLevelToString(static_cast<Entry::Level>(priority));
+        newLogEntry.append(msg, std::move(logLevel),
+                           std::map<std::string, std::string>{});
+        conn->call(newLogEntry);
+#else
+        sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
+                        priority, "REDFISH_MESSAGE_ID=%s", redfish_id.c_str(),
+                        "REDFISH_MESSAGE_ARGS=%s", redfish_msg.c_str(), NULL);
+#endif
     }
 };
 } // namespace host_error_monitor::base_monitor

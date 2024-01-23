@@ -18,3 +18,10 @@ option(
     value: 'disabled',
     description: 'Enable unit tests',
 )
+
+option(
+    'send-to-logger',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Use D-Bus Logging interface for reporting'
+)

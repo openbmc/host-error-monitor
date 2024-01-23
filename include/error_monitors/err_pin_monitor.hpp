@@ -56,10 +56,7 @@ class ErrPinMonitor :
     {
         std::string msg = "ERR" + std::to_string(errPin);
 
-        sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                        LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.CPUError", "REDFISH_MESSAGE_ARGS=%s",
-                        msg.c_str(), NULL);
+        log_message(LOG_INFO, msg, "OpenBMC.0.1.CPUError", msg);
     }
 
     void errPinLog(const int cpuNum)
@@ -67,10 +64,7 @@ class ErrPinMonitor :
         std::string msg = "ERR" + std::to_string(errPin) + " on CPU " +
                           std::to_string(cpuNum + 1);
 
-        sd_journal_send("MESSAGE=HostError: %s", msg.c_str(), "PRIORITY=%i",
-                        LOG_INFO, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.CPUError", "REDFISH_MESSAGE_ARGS=%s",
-                        msg.c_str(), NULL);
+        log_message(LOG_INFO, msg, "OpenBMC.0.1.CPUError", msg);
     }
 
   public:

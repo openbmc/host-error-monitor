@@ -34,10 +34,10 @@ class CPUMismatchMonitor : public host_error_monitor::base_monitor::BaseMonitor
 
     void cpuMismatchLog()
     {
-        sd_journal_send("MESSAGE=HostError: CPU %d mismatch", cpuNum,
-                        "PRIORITY=%i", LOG_ERR, "REDFISH_MESSAGE_ID=%s",
-                        "OpenBMC.0.1.CPUMismatch", "REDFISH_MESSAGE_ARGS=%d",
-                        cpuNum, NULL);
+        const std::string cpuS = std::to_string(cpuNum);
+
+        log_message(LOG_ERR, "CPU " + cpuS + " mismatch",
+                    "OpenBMC.0.1.CPUMismatch", cpuS);
     }
 
     bool requestCPUMismatchInput()
