@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "634d2a79_928298c7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000936
+      },
+      "writtenOn": "2024-01-24T10:48:26Z",
+      "side": 1,
+      "message": "Hello,\nCI wasn\u0027t run due to Gerrit group rename, should be taken care with https://gerrit.openbmc.org/c/openbmc/openbmc-build-scripts/+/69010 .",
+      "revId": "ae8e5545a6fc9e8a2604a5741a145ff33b961cce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
