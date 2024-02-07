@@ -16,6 +16,23 @@
       "message": "Thanks for the Tested update. It\u0027s been a couple weeks with no further feedback, so going ahead with +2.",
       "revId": "97b5ef20b4c2968503ccc0d3dd2d49b2b192f2f2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fccc9d68_a65c637e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000936
+      },
+      "writtenOn": "2024-02-07T19:43:47Z",
+      "side": 1,
+      "message": "Thank you for review!\n\nWhat is the usual process for updating the .bb file in the meta layer? This option should be added while the version there is bumped.\n```\n+PACKAGECONFIG[send-to-logger] \u003d \"-Dsend-to-logger\u003denabled,-Dsend-to-logger\u003ddisabled\"\n```",
+      "revId": "97b5ef20b4c2968503ccc0d3dd2d49b2b192f2f2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ],
   "submitRequirementResults": []
