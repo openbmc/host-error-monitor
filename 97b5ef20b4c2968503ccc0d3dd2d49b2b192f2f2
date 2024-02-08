@@ -33,6 +33,24 @@
       "message": "Thank you for review!\n\nWhat is the usual process for updating the .bb file in the meta layer? This option should be added while the version there is bumped.\n```\n+PACKAGECONFIG[send-to-logger] \u003d \"-Dsend-to-logger\u003denabled,-Dsend-to-logger\u003ddisabled\"\n```",
       "revId": "97b5ef20b4c2968503ccc0d3dd2d49b2b192f2f2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7b4676d6_50958cca",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2024-02-08T14:40:47Z",
+      "side": 1,
+      "message": "There is an autobump script that updates the .bb file automatically.  This is the update for host-error-monitor: https://gerrit.openbmc.org/c/openbmc/openbmc/+/69271.  You can edit that commit or push your own.",
+      "parentUuid": "fccc9d68_a65c637e",
+      "revId": "97b5ef20b4c2968503ccc0d3dd2d49b2b192f2f2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ],
   "submitRequirementResults": []
