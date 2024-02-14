@@ -72,13 +72,13 @@ static void initializeHostState()
         "xyz.openbmc_project.State.Host", "CurrentHostState");
 }
 
-static std::shared_ptr<sdbusplus::bus::match::match> startHostStateMonitor()
+static std::shared_ptr<sdbusplus::bus::match_t> startHostStateMonitor()
 {
-    return std::make_shared<sdbusplus::bus::match::match>(
+    return std::make_shared<sdbusplus::bus::match_t>(
         *conn,
         "type='signal',interface='org.freedesktop.DBus.Properties',"
         "member='PropertiesChanged',arg0='xyz.openbmc_project.State.Host'",
-        [](sdbusplus::message::message& msg) {
+        [](sdbusplus::message_t& msg) {
             std::string interfaceName;
             boost::container::flat_map<std::string, std::variant<std::string>>
                 propertiesChanged;
@@ -132,7 +132,7 @@ int main(int /*argc*/, char* /*argv*/[])
         sdbusplus::asio::object_server(host_error_monitor::conn);
 
     // Start tracking host state
-    std::shared_ptr<sdbusplus::bus::match::match> hostStateMonitor =
+    std::shared_ptr<sdbusplus::bus::match_t> hostStateMonitor =
         host_error_monitor::startHostStateMonitor();
 
     // Initialize the signal monitors

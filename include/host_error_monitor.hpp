@@ -101,15 +101,15 @@ void startCrashdumpAndRecovery(
     static RecoveryType recovery;
     recovery = requestedRecovery;
     std::cerr << "Starting crashdump\n";
-    static std::shared_ptr<sdbusplus::bus::match::match> crashdumpCompleteMatch;
+    static std::shared_ptr<sdbusplus::bus::match_t> crashdumpCompleteMatch;
 
     if (!crashdumpCompleteMatch)
     {
-        crashdumpCompleteMatch = std::make_shared<sdbusplus::bus::match::match>(
+        crashdumpCompleteMatch = std::make_shared<sdbusplus::bus::match_t>(
             *conn,
             "type='signal',interface='com.intel.crashdump',member='"
             "CrashdumpComplete'",
-            [conn](sdbusplus::message::message& /*msg*/) {
+            [conn](sdbusplus::message_t& /*msg*/) {
                 std::cerr << "Crashdump completed\n";
                 handleRecovery(recovery, conn);
                 crashdumpCompleteMatch.reset();
