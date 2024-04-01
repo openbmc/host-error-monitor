@@ -81,6 +81,6 @@ executable(
 
 subdir('service_files')
 
-if get_option('tests').enabled()
+if get_option('tests').allowed()
     subdir('tests')
 endif
