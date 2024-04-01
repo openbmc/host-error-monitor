@@ -15,7 +15,7 @@ option(
 option(
     'tests',
     type: 'feature',
-    value: 'disabled',
+    value: 'enabled',
     description: 'Enable unit tests',
 )
 
