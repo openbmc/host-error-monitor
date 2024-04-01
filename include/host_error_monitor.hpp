@@ -197,7 +197,7 @@ static void printPECIError(const std::string& reg, const size_t addr,
 
         switch (model)
         {
-            case skx:
+            case skylake:
             {
                 // Check the ERRPINSTS to see if this is the CPU that
                 // caused the ERRx (B(0) D8 F0 offset 210h)
@@ -214,7 +214,7 @@ static void printPECIError(const std::string& reg, const size_t addr,
                 errPinCPUs[cpu] = (errpinsts & (1 << errPin)) != 0;
                 break;
             }
-            case icx:
+            case iceLake:
             {
                 // Check the ERRPINSTS to see if this is the CPU that
                 // caused the ERRx (B(30) D0 F3 offset 274h) (Note: Bus

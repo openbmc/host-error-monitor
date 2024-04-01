@@ -90,7 +90,7 @@ class IERRMonitor :
 
             switch (model)
             {
-                case skx:
+                case skylake:
                 {
                     // First check the MCA_ERR_SRC_LOG to see if this is the CPU
                     // that caused the IERR
@@ -184,7 +184,7 @@ class IERRMonitor :
                     }
                     break;
                 }
-                case icx:
+                case iceLake:
                 {
                     // First check the MCA_ERR_SRC_LOG to see if this is the CPU
                     // that caused the IERR
