@@ -52,21 +52,21 @@ static void initializeHostState()
     conn->async_method_call(
         [](boost::system::error_code ec,
            const std::variant<std::string>& property) {
-            if (ec)
-            {
-                return;
-            }
-            const std::string* state = std::get_if<std::string>(&property);
-            if (state == nullptr)
-            {
-                std::cerr << "Unable to read host state value\n";
-                return;
-            }
-            hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
+        if (ec)
+        {
+            return;
+        }
+        const std::string* state = std::get_if<std::string>(&property);
+        if (state == nullptr)
+        {
+            std::cerr << "Unable to read host state value\n";
+            return;
+        }
+        hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
 
-            // Now we have the host state, we can init if needed
-            init();
-        },
+        // Now we have the host state, we can init if needed
+        init();
+    },
         "xyz.openbmc_project.State.Host", "/xyz/openbmc_project/state/host0",
         "org.freedesktop.DBus.Properties", "Get",
         "xyz.openbmc_project.State.Host", "CurrentHostState");
@@ -79,43 +79,43 @@ static std::shared_ptr<sdbusplus::bus::match_t> startHostStateMonitor()
         "type='signal',interface='org.freedesktop.DBus.Properties',"
         "member='PropertiesChanged',arg0='xyz.openbmc_project.State.Host'",
         [](sdbusplus::message_t& msg) {
-            std::string interfaceName;
-            boost::container::flat_map<std::string, std::variant<std::string>>
-                propertiesChanged;
-            try
-            {
-                msg.read(interfaceName, propertiesChanged);
-            }
-            catch (std::exception& e)
-            {
-                std::cerr << "Unable to read host state\n";
-                return;
-            }
-            // We only want to check for CurrentHostState
-            if (propertiesChanged.begin()->first != "CurrentHostState")
-            {
-                return;
-            }
-            std::string* state =
-                std::get_if<std::string>(&(propertiesChanged.begin()->second));
-            if (state == nullptr)
-            {
-                std::cerr << propertiesChanged.begin()->first
-                          << " property invalid\n";
-                return;
-            }
+        std::string interfaceName;
+        boost::container::flat_map<std::string, std::variant<std::string>>
+            propertiesChanged;
+        try
+        {
+            msg.read(interfaceName, propertiesChanged);
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << "Unable to read host state\n";
+            return;
+        }
+        // We only want to check for CurrentHostState
+        if (propertiesChanged.begin()->first != "CurrentHostState")
+        {
+            return;
+        }
+        std::string* state =
+            std::get_if<std::string>(&(propertiesChanged.begin()->second));
+        if (state == nullptr)
+        {
+            std::cerr << propertiesChanged.begin()->first
+                      << " property invalid\n";
+            return;
+        }
 
-            hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
+        hostOff = *state == "xyz.openbmc_project.State.Host.HostState.Off";
 
-            // Now we have the host state, we can init if needed
-            init();
+        // Now we have the host state, we can init if needed
+        init();
 
-            if (!hostOff)
-            {
-                // Notify error monitors when the host turns on
-                error_monitors::sendHostOn();
-            }
-        });
+        if (!hostOff)
+        {
+            // Notify error monitors when the host turns on
+            error_monitors::sendHostOn();
+        }
+    });
 }
 } // namespace host_error_monitor
 

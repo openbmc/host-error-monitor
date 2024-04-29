@@ -35,12 +35,11 @@ void startPowerCycle(std::shared_ptr<sdbusplus::asio::connection> conn)
 {
     conn->async_method_call(
         [](boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "failed to set Chassis State\n";
-            }
-        },
-        "xyz.openbmc_project.State.Chassis",
+        if (ec)
+        {
+            std::cerr << "failed to set Chassis State\n";
+        }
+    }, "xyz.openbmc_project.State.Chassis",
         "/xyz/openbmc_project/state/chassis0",
         "org.freedesktop.DBus.Properties", "Set",
         "xyz.openbmc_project.State.Chassis", "RequestedPowerTransition",
@@ -52,12 +51,11 @@ void startWarmReset(std::shared_ptr<sdbusplus::asio::connection> conn)
 {
     conn->async_method_call(
         [](boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "failed to set Host State\n";
-            }
-        },
-        "xyz.openbmc_project.State.Host", "/xyz/openbmc_project/state/host0",
+        if (ec)
+        {
+            std::cerr << "failed to set Host State\n";
+        }
+    }, "xyz.openbmc_project.State.Host", "/xyz/openbmc_project/state/host0",
         "org.freedesktop.DBus.Properties", "Set",
         "xyz.openbmc_project.State.Host", "RequestedHostTransition",
         std::variant<std::string>{
@@ -110,27 +108,26 @@ void startCrashdumpAndRecovery(
             "type='signal',interface='com.intel.crashdump',member='"
             "CrashdumpComplete'",
             [conn](sdbusplus::message_t& /*msg*/) {
-                std::cerr << "Crashdump completed\n";
-                handleRecovery(recovery, conn);
-                crashdumpCompleteMatch.reset();
-            });
+            std::cerr << "Crashdump completed\n";
+            handleRecovery(recovery, conn);
+            crashdumpCompleteMatch.reset();
+        });
     }
 
     conn->async_method_call(
         [](boost::system::error_code ec) {
-            if (ec)
+        if (ec)
+        {
+            if (ec.value() == boost::system::errc::device_or_resource_busy)
             {
-                if (ec.value() == boost::system::errc::device_or_resource_busy)
-                {
-                    std::cerr << "Crashdump already in progress. Waiting for "
-                                 "completion signal\n";
-                    return;
-                }
-
-                std::cerr << "failed to start Crashdump\n";
+                std::cerr << "Crashdump already in progress. Waiting for "
+                             "completion signal\n";
+                return;
             }
-        },
-        "com.intel.crashdump", "/com/intel/crashdump",
+
+            std::cerr << "failed to start Crashdump\n";
+        }
+    }, "com.intel.crashdump", "/com/intel/crashdump",
         "com.intel.crashdump.Stored", "GenerateStoredLog", triggerType);
 #endif
 }
@@ -160,15 +157,14 @@ static void printPECIError(const std::string& reg, const size_t addr,
 {
     conn->async_method_call(
         [](boost::system::error_code ec) {
-            if (ec)
-            {
-                std::cerr << "beep returned error with "
-                             "async_method_call (ec = "
-                          << ec << ")\n";
-                return;
-            }
-        },
-        "xyz.openbmc_project.BeepCode", "/xyz/openbmc_project/BeepCode",
+        if (ec)
+        {
+            std::cerr << "beep returned error with "
+                         "async_method_call (ec = "
+                      << ec << ")\n";
+            return;
+        }
+    }, "xyz.openbmc_project.BeepCode", "/xyz/openbmc_project/BeepCode",
         "xyz.openbmc_project.BeepCode", "Beep", uint8_t(beepPriority));
 }
 

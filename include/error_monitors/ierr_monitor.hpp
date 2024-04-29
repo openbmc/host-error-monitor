@@ -112,8 +112,8 @@ class IERRMonitor :
                         // Next check if it's a CPU/VR mismatch by reading the
                         // IA32_MC4_STATUS MSR (0x411)
                         uint64_t mc4Status = 0;
-                        peciStatus =
-                            peci_RdIAMSR(addr, 0, 0x411, &mc4Status, &cc);
+                        peciStatus = peci_RdIAMSR(addr, 0, 0x411, &mc4Status,
+                                                  &cc);
                         if (peciError(peciStatus, cc))
                         {
                             printPECIError("IA32_MC4_STATUS", addr, peciStatus,
@@ -206,8 +206,8 @@ class IERRMonitor :
                         // Next check if it's a CPU/VR mismatch by reading the
                         // IA32_MC4_STATUS MSR (0x411)
                         uint64_t mc4Status = 0;
-                        peciStatus =
-                            peci_RdIAMSR(addr, 0, 0x411, &mc4Status, &cc);
+                        peciStatus = peci_RdIAMSR(addr, 0, 0x411, &mc4Status,
+                                                  &cc);
                         if (peciError(peciStatus, cc))
                         {
                             printPECIError("IA32_MC4_STATUS", addr, peciStatus,
@@ -309,41 +309,39 @@ class IERRMonitor :
         conn->async_method_call(
             [this, propertyName](boost::system::error_code ec,
                                  const std::variant<uint8_t>& property) {
+            if (ec)
+            {
+                std::cerr << "Failed to read " << propertyName << ": "
+                          << ec.message() << "\n";
+                return;
+            }
+            const uint8_t* errorCountVariant = std::get_if<uint8_t>(&property);
+            if (errorCountVariant == nullptr)
+            {
+                std::cerr << propertyName << " invalid\n";
+                return;
+            }
+            uint8_t errorCount = *errorCountVariant;
+            if (errorCount == std::numeric_limits<uint8_t>::max())
+            {
+                std::cerr << "Maximum error count reached\n";
+                return;
+            }
+            // Increment the count
+            errorCount++;
+            conn->async_method_call(
+                [propertyName](boost::system::error_code ec) {
                 if (ec)
                 {
-                    std::cerr << "Failed to read " << propertyName << ": "
+                    std::cerr << "Failed to set " << propertyName << ": "
                               << ec.message() << "\n";
-                    return;
                 }
-                const uint8_t* errorCountVariant =
-                    std::get_if<uint8_t>(&property);
-                if (errorCountVariant == nullptr)
-                {
-                    std::cerr << propertyName << " invalid\n";
-                    return;
-                }
-                uint8_t errorCount = *errorCountVariant;
-                if (errorCount == std::numeric_limits<uint8_t>::max())
-                {
-                    std::cerr << "Maximum error count reached\n";
-                    return;
-                }
-                // Increment the count
-                errorCount++;
-                conn->async_method_call(
-                    [propertyName](boost::system::error_code ec) {
-                        if (ec)
-                        {
-                            std::cerr << "Failed to set " << propertyName
-                                      << ": " << ec.message() << "\n";
-                        }
-                    },
-                    "xyz.openbmc_project.Settings",
-                    "/xyz/openbmc_project/control/processor_error_config",
-                    "org.freedesktop.DBus.Properties", "Set",
-                    "xyz.openbmc_project.Control.Processor.ErrConfig",
-                    propertyName, std::variant<uint8_t>{errorCount});
-            },
+            }, "xyz.openbmc_project.Settings",
+                "/xyz/openbmc_project/control/processor_error_config",
+                "org.freedesktop.DBus.Properties", "Set",
+                "xyz.openbmc_project.Control.Processor.ErrConfig", propertyName,
+                std::variant<uint8_t>{errorCount});
+        },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
             "org.freedesktop.DBus.Properties", "Get",
@@ -363,22 +361,22 @@ class IERRMonitor :
         conn->async_method_call(
             [this](boost::system::error_code ec,
                    const std::variant<bool>& property) {
-                // Default to no reset after Crashdump
-                RecoveryType recovery = RecoveryType::noRecovery;
-                if (!ec)
+            // Default to no reset after Crashdump
+            RecoveryType recovery = RecoveryType::noRecovery;
+            if (!ec)
+            {
+                const bool* resetPtr = std::get_if<bool>(&property);
+                if (resetPtr == nullptr)
                 {
-                    const bool* resetPtr = std::get_if<bool>(&property);
-                    if (resetPtr == nullptr)
-                    {
-                        std::cerr << "Unable to read reset on IERR value\n";
-                    }
-                    else if (*resetPtr)
-                    {
-                        recovery = RecoveryType::warmReset;
-                    }
+                    std::cerr << "Unable to read reset on IERR value\n";
                 }
-                startCrashdumpAndRecovery(conn, recovery, "IERR");
-            },
+                else if (*resetPtr)
+                {
+                    recovery = RecoveryType::warmReset;
+                }
+            }
+            startCrashdumpAndRecovery(conn, recovery, "IERR");
+        },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
             "org.freedesktop.DBus.Properties", "Get",
@@ -438,19 +436,18 @@ class IERRMonitor :
         hostErrorTimeoutIface->register_property(
             "IERRTimeoutMs", ierrTimeoutMs,
             [this](const std::size_t& requested, std::size_t& resp) {
-                if (requested > ierrTimeoutMsMax)
-                {
-                    std::cerr << "IERRTimeoutMs update to " << requested
-                              << "ms rejected. Cannot be greater than "
-                              << ierrTimeoutMsMax << "ms.\n";
-                    return 0;
-                }
-                std::cerr << "IERRTimeoutMs updated to " << requested << "ms\n";
-                setTimeoutMs(requested);
-                resp = requested;
-                return 1;
-            },
-            [this](std::size_t& /*resp*/) { return getTimeoutMs(); });
+            if (requested > ierrTimeoutMsMax)
+            {
+                std::cerr << "IERRTimeoutMs update to " << requested
+                          << "ms rejected. Cannot be greater than "
+                          << ierrTimeoutMsMax << "ms.\n";
+                return 0;
+            }
+            std::cerr << "IERRTimeoutMs updated to " << requested << "ms\n";
+            setTimeoutMs(requested);
+            resp = requested;
+            return 1;
+        }, [this](std::size_t& /*resp*/) { return getTimeoutMs(); });
         hostErrorTimeoutIface->initialize();
 
         std::string objectName = customName.empty() ? signalName : customName;

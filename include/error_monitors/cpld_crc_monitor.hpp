@@ -90,8 +90,7 @@ class CPLDCRCMonitor :
                    std::shared_ptr<sdbusplus::asio::connection> conn,
                    const std::string& signalName, const size_t cpuNum,
                    const std::string& cpuPresenceName) :
-        BaseGPIOMonitor(io, conn, signalName, assertValue),
-        cpuNum(cpuNum)
+        BaseGPIOMonitor(io, conn, signalName, assertValue), cpuNum(cpuNum)
     {
         if (!getCPUPresence(cpuPresenceName))
         {

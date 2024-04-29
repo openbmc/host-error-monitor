@@ -87,8 +87,7 @@ class CPUPresenceMonitor : public host_error_monitor::base_monitor::BaseMonitor
     CPUPresenceMonitor(boost::asio::io_context& io,
                        std::shared_ptr<sdbusplus::asio::connection> conn,
                        const std::string& signalName, const size_t cpuNum) :
-        BaseMonitor(io, conn, signalName),
-        cpuNum(cpuNum)
+        BaseMonitor(io, conn, signalName), cpuNum(cpuNum)
     {
         if (!getCPUPresence(signalName))
         {

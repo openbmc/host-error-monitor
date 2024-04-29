@@ -48,31 +48,31 @@ class SMIMonitor :
         conn->async_method_call(
             [this](boost::system::error_code ec,
                    const std::variant<bool>& property) {
-                // Default to no reset after Crashdump
-                bool reset = false;
-                if (!ec)
+            // Default to no reset after Crashdump
+            bool reset = false;
+            if (!ec)
+            {
+                const bool* resetPtr = std::get_if<bool>(&property);
+                if (resetPtr == nullptr)
                 {
-                    const bool* resetPtr = std::get_if<bool>(&property);
-                    if (resetPtr == nullptr)
-                    {
-                        std::cerr << "Unable to read reset on " << signalName
-                                  << " value\n";
-                    }
-                    else
-                    {
-                        reset = *resetPtr;
-                    }
+                    std::cerr << "Unable to read reset on " << signalName
+                              << " value\n";
                 }
+                else
+                {
+                    reset = *resetPtr;
+                }
+            }
 #ifdef HOST_ERROR_CRASHDUMP_ON_SMI_TIMEOUT
-                startCrashdumpAndRecovery(conn, reset, "SMI Timeout");
+            startCrashdumpAndRecovery(conn, reset, "SMI Timeout");
 #else
-                if (reset)
-                {
-                    std::cout << "Recovering the system\n";
-                    startWarmReset(conn);
-                }
+            if (reset)
+            {
+                std::cout << "Recovering the system\n";
+                startWarmReset(conn);
+            }
 #endif
-            },
+        },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/bmc_reset_disables",
             "org.freedesktop.DBus.Properties", "Get",

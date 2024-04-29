@@ -39,8 +39,7 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
 
     AssertValue assertValue;
 
-    virtual void logEvent()
-    {}
+    virtual void logEvent() {}
 
     bool requestEvents()
     {
@@ -116,8 +115,7 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
         logEvent();
     }
 
-    virtual void deassertHandler()
-    {}
+    virtual void deassertHandler() {}
 
   private:
     void waitForEvent()
@@ -127,33 +125,32 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
             std::cerr << "Wait for " << signalName << "\n";
         }
 
-        event.async_wait(
-            boost::asio::posix::stream_descriptor::wait_read,
-            [this](const boost::system::error_code ec) {
-                if (ec)
+        event.async_wait(boost::asio::posix::stream_descriptor::wait_read,
+                         [this](const boost::system::error_code ec) {
+            if (ec)
+            {
+                // operation_aborted is expected if wait is canceled.
+                if (ec != boost::asio::error::operation_aborted)
                 {
-                    // operation_aborted is expected if wait is canceled.
-                    if (ec != boost::asio::error::operation_aborted)
-                    {
-                        std::cerr << signalName
-                                  << " wait error: " << ec.message() << "\n";
-                    }
-                    return;
+                    std::cerr << signalName << " wait error: " << ec.message()
+                              << "\n";
                 }
+                return;
+            }
 
-                if constexpr (debug)
-                {
-                    std::cerr << signalName << " event ready\n";
-                }
+            if constexpr (debug)
+            {
+                std::cerr << signalName << " event ready\n";
+            }
 
-                gpiod::line_event gpioLineEvent = line.event_read();
+            gpiod::line_event gpioLineEvent = line.event_read();
 
-                // With FLAG_ACTIVE_LOW enabled, both active-high and active-low
-                // signals have a RISING_EDGE event when asserted
-                checkEvent(gpioLineEvent.event_type ==
-                           gpiod::line_event::RISING_EDGE);
-                waitForEvent();
-            });
+            // With FLAG_ACTIVE_LOW enabled, both active-high and active-low
+            // signals have a RISING_EDGE event when asserted
+            checkEvent(gpioLineEvent.event_type ==
+                       gpiod::line_event::RISING_EDGE);
+            waitForEvent();
+        });
     }
 
   public:
@@ -171,8 +168,7 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
     BaseGPIOMonitor(boost::asio::io_context& io,
                     std::shared_ptr<sdbusplus::asio::connection> conn,
                     const std::string& signalName, AssertValue assertValue) :
-        BaseMonitor(io, conn, signalName),
-        event(io), assertValue(assertValue)
+        BaseMonitor(io, conn, signalName), event(io), assertValue(assertValue)
     {
         if (!requestEvents())
         {

@@ -46,22 +46,22 @@ class Err2Monitor :
         conn->async_method_call(
             [this](boost::system::error_code ec,
                    const std::variant<bool>& property) {
-                // Default to no reset after Crashdump
-                RecoveryType recovery = RecoveryType::noRecovery;
-                if (!ec)
+            // Default to no reset after Crashdump
+            RecoveryType recovery = RecoveryType::noRecovery;
+            if (!ec)
+            {
+                const bool* resetPtr = std::get_if<bool>(&property);
+                if (resetPtr == nullptr)
                 {
-                    const bool* resetPtr = std::get_if<bool>(&property);
-                    if (resetPtr == nullptr)
-                    {
-                        std::cerr << "Unable to read reset on ERR2 value\n";
-                    }
-                    else if (*resetPtr)
-                    {
-                        recovery = RecoveryType::warmReset;
-                    }
+                    std::cerr << "Unable to read reset on ERR2 value\n";
                 }
-                startCrashdumpAndRecovery(conn, recovery, "ERR2 Timeout");
-            },
+                else if (*resetPtr)
+                {
+                    recovery = RecoveryType::warmReset;
+                }
+            }
+            startCrashdumpAndRecovery(conn, recovery, "ERR2 Timeout");
+        },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
             "org.freedesktop.DBus.Properties", "Get",

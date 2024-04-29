@@ -48,8 +48,7 @@ class MemThermtripMonitor :
                         std::shared_ptr<sdbusplus::asio::connection> conn,
                         const std::string& signalName, const size_t cpuNum,
                         const std::string& customName = std::string()) :
-        BaseGPIOMonitor(io, conn, signalName, assertValue),
-        cpuNum(cpuNum)
+        BaseGPIOMonitor(io, conn, signalName, assertValue), cpuNum(cpuNum)
     {
         sdbusplus::asio::object_server server =
             sdbusplus::asio::object_server(conn);

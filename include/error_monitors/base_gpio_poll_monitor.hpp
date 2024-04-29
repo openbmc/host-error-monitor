@@ -45,8 +45,7 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
     size_t pollingTimeMs;
     size_t timeoutMs;
 
-    virtual void logEvent()
-    {}
+    virtual void logEvent() {}
 
     bool requestEvents()
     {
@@ -110,8 +109,7 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
         logEvent();
     }
 
-    virtual void deassertHandler()
-    {}
+    virtual void deassertHandler() {}
 
   private:
     void flushEvents()
@@ -141,27 +139,26 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
             std::cerr << "Wait for " << signalName << "\n";
         }
 
-        event.async_wait(
-            boost::asio::posix::stream_descriptor::wait_read,
-            [this](const boost::system::error_code ec) {
-                if (ec)
+        event.async_wait(boost::asio::posix::stream_descriptor::wait_read,
+                         [this](const boost::system::error_code ec) {
+            if (ec)
+            {
+                // operation_aborted is expected if wait is canceled.
+                if (ec != boost::asio::error::operation_aborted)
                 {
-                    // operation_aborted is expected if wait is canceled.
-                    if (ec != boost::asio::error::operation_aborted)
-                    {
-                        std::cerr << signalName
-                                  << " wait error: " << ec.message() << "\n";
-                    }
-                    return;
+                    std::cerr << signalName << " wait error: " << ec.message()
+                              << "\n";
                 }
+                return;
+            }
 
-                if constexpr (debug)
-                {
-                    std::cerr << signalName << " event ready\n";
-                }
+            if constexpr (debug)
+            {
+                std::cerr << signalName << " event ready\n";
+            }
 
-                startPolling();
-            });
+            startPolling();
+        });
     }
 
   public:
@@ -228,9 +225,9 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
                         std::shared_ptr<sdbusplus::asio::connection> conn,
                         const std::string& signalName, AssertValue assertValue,
                         size_t pollingTimeMs, size_t timeoutMs) :
-        BaseMonitor(io, conn, signalName),
-        pollingTimer(io), event(io), assertValue(assertValue),
-        pollingTimeMs(pollingTimeMs), timeoutMs(timeoutMs)
+        BaseMonitor(io, conn, signalName), pollingTimer(io), event(io),
+        assertValue(assertValue), pollingTimeMs(pollingTimeMs),
+        timeoutMs(timeoutMs)
     {
         if (!requestEvents())
         {

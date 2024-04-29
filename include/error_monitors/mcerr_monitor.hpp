@@ -39,8 +39,7 @@ class MCERRMonitor :
         const std::string& signalName,
         const host_error_monitor::base_gpio_monitor::AssertValue assertValue,
         const size_t cpuNum) :
-        BaseGPIOMonitor(io, conn, signalName, assertValue),
-        cpuNum(cpuNum)
+        BaseGPIOMonitor(io, conn, signalName, assertValue), cpuNum(cpuNum)
     {
         if (valid)
         {

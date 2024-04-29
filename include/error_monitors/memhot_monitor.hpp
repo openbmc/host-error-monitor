@@ -42,8 +42,7 @@ class MemhotMonitor :
     MemhotMonitor(boost::asio::io_context& io,
                   std::shared_ptr<sdbusplus::asio::connection> conn,
                   const std::string& signalName, const size_t cpuNum) :
-        BaseGPIOMonitor(io, conn, signalName, assertValue),
-        cpuNum(cpuNum)
+        BaseGPIOMonitor(io, conn, signalName, assertValue), cpuNum(cpuNum)
     {
         if (valid)
         {
