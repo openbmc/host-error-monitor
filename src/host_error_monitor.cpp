@@ -46,7 +46,7 @@ static void init()
         }
     }
 }
-static void initializeHostState()
+[[maybe_unused]] static void initializeHostState()
 {
     // Get the current host state to prepare to start the signal monitors
     conn->async_method_call(
@@ -72,7 +72,8 @@ static void initializeHostState()
         "xyz.openbmc_project.State.Host", "CurrentHostState");
 }
 
-static std::shared_ptr<sdbusplus::bus::match_t> startHostStateMonitor()
+[[maybe_unused]] static std::shared_ptr<sdbusplus::bus::match_t>
+    startHostStateMonitor()
 {
     return std::make_shared<sdbusplus::bus::match_t>(
         *conn,
@@ -119,6 +120,7 @@ static std::shared_ptr<sdbusplus::bus::match_t> startHostStateMonitor()
 }
 } // namespace host_error_monitor
 
+#ifndef UNIT_TEST
 int main(int /*argc*/, char* /*argv*/[])
 {
     // setup connection to dbus
@@ -142,3 +144,4 @@ int main(int /*argc*/, char* /*argv*/[])
 
     return 0;
 }
+#endif

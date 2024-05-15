@@ -29,6 +29,8 @@ if get_option('tests').enabled()
             executable(
                 unit_test,
                 unit_test + '.cpp',
+                '../src/host_error_monitor.cpp',
+                cpp_args: '-DUNIT_TEST',
                 include_directories: incs,
                 dependencies: deps
                 + [
