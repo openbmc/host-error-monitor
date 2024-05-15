@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 #pragma once
+#include <boost/asio/io_context.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 #include <xyz/openbmc_project/Logging/Entry/common.hpp>
 
