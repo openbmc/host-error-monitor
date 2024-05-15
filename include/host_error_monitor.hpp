@@ -31,7 +31,8 @@ using Association = std::tuple<std::string, std::string, std::string>;
 
 bool hostIsOff();
 
-void startPowerCycle(std::shared_ptr<sdbusplus::asio::connection> conn)
+static inline void
+    startPowerCycle(std::shared_ptr<sdbusplus::asio::connection> conn)
 {
     conn->async_method_call(
         [](boost::system::error_code ec) {
@@ -48,7 +49,8 @@ void startPowerCycle(std::shared_ptr<sdbusplus::asio::connection> conn)
             "xyz.openbmc_project.State.Chassis.Transition.PowerCycle"});
 }
 
-void startWarmReset(std::shared_ptr<sdbusplus::asio::connection> conn)
+static inline void
+    startWarmReset(std::shared_ptr<sdbusplus::asio::connection> conn)
 {
     conn->async_method_call(
         [](boost::system::error_code ec) {
@@ -92,7 +94,7 @@ static inline void
     }
 }
 
-void startCrashdumpAndRecovery(
+static inline void startCrashdumpAndRecovery(
     [[maybe_unused]] std::shared_ptr<sdbusplus::asio::connection> conn,
     [[maybe_unused]] RecoveryType requestedRecovery,
     [[maybe_unused]] const std::string& triggerType)
@@ -154,7 +156,7 @@ static void printPECIError(const std::string& reg, const size_t addr,
 }
 #endif
 
-[[maybe_unused]] static void
+[[maybe_unused]] static inline void
     beep(std::shared_ptr<sdbusplus::asio::connection> conn,
          const uint8_t& beepPriority)
 {
@@ -172,7 +174,7 @@ static void printPECIError(const std::string& reg, const size_t addr,
         "xyz.openbmc_project.BeepCode", "Beep", uint8_t(beepPriority));
 }
 
-[[maybe_unused]] static void
+[[maybe_unused]] static inline void
     checkErrPinCPUs([[maybe_unused]] const size_t errPin,
                     std::bitset<MAX_CPUS>& errPinCPUs)
 {
