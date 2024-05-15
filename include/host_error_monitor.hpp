@@ -130,6 +130,8 @@ static inline void startCrashdumpAndRecovery(
                 }
 
                 std::cerr << "failed to start Crashdump\n";
+                handleRecovery(recovery, conn);
+                crashdumpCompleteMatch.reset();
             }
         },
         "com.intel.crashdump", "/com/intel/crashdump",
