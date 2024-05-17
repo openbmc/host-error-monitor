@@ -23,5 +23,5 @@ option(
     'send-to-logger',
     type: 'feature',
     value: 'disabled',
-    description: 'Use D-Bus Logging interface for reporting'
+    description: 'Use D-Bus Logging interface for reporting',
 )

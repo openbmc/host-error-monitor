@@ -8,31 +8,34 @@ if not gtest_dep.found() or not gmock_dep.found()
                 dependency('threads'),
                 gtest_proj.dependency('gtest'),
                 gtest_proj.dependency('gtest_main'),
-            ]
+            ],
         )
         gmock_dep = gtest_proj.dependency('gmock')
-  else
+    else
         assert(
             not get_option('tests').enabled(),
-            'Googletest is required if tests are enabled'
+            'Googletest is required if tests are enabled',
         )
-  endif
+    endif
 endif
 
-unit_tests = [
-]
+unit_tests = []
 
 if get_option('tests').enabled()
     # generate the test executable
     foreach unit_test : unit_tests
-        test(unit_test, executable(
+        test(
             unit_test,
-            unit_test + '.cpp',
-            include_directories: incs,
-            dependencies: deps + [
-                gtest_dep,
-                gmock_dep,
-            ])
+            executable(
+                unit_test,
+                unit_test + '.cpp',
+                include_directories: incs,
+                dependencies: deps
+                + [
+                    gtest_dep,
+                    gmock_dep,
+                ],
+            ),
         )
     endforeach
 endif
