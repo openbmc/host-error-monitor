@@ -119,7 +119,7 @@ static inline void startCrashdumpAndRecovery(
     }
 
     conn->async_method_call(
-        [](boost::system::error_code ec) {
+        [conn](boost::system::error_code ec) {
             if (ec)
             {
                 if (ec.value() == boost::system::errc::device_or_resource_busy)
