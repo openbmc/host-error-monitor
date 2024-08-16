@@ -52,9 +52,9 @@ class CPLDCRCMonitor :
         // Request GPIO input
         try
         {
-            cpuPresenceLine.request({"host-error-monitor",
-                                     gpiod::line_request::DIRECTION_INPUT,
-                                     gpiod::line_request::FLAG_ACTIVE_LOW});
+            cpuPresenceLine.request(
+                {"host-error-monitor", gpiod::line_request::DIRECTION_INPUT,
+                 gpiod::line_request::FLAG_ACTIVE_LOW});
         }
         catch (std::exception&)
         {
@@ -90,8 +90,7 @@ class CPLDCRCMonitor :
                    std::shared_ptr<sdbusplus::asio::connection> conn,
                    const std::string& signalName, const size_t cpuNum,
                    const std::string& cpuPresenceName) :
-        BaseGPIOMonitor(io, conn, signalName, assertValue),
-        cpuNum(cpuNum)
+        BaseGPIOMonitor(io, conn, signalName, assertValue), cpuNum(cpuNum)
     {
         if (!getCPUPresence(cpuPresenceName))
         {

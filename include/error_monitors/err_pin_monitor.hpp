@@ -71,8 +71,7 @@ class ErrPinMonitor :
     ErrPinMonitor(boost::asio::io_context& io,
                   std::shared_ptr<sdbusplus::asio::connection> conn,
                   const std::string& signalName, const size_t errPin) :
-        BaseGPIOMonitor(io, conn, signalName, assertValue),
-        errPin(errPin)
+        BaseGPIOMonitor(io, conn, signalName, assertValue), errPin(errPin)
     {
         if (valid)
         {

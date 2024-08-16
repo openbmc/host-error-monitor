@@ -35,15 +35,13 @@ class BaseMonitor
     BaseMonitor(boost::asio::io_context& io,
                 std::shared_ptr<sdbusplus::asio::connection> conn,
                 const std::string& signalName) :
-        valid(false),
-        io(io), conn(conn), signalName(signalName)
+        valid(false), io(io), conn(conn), signalName(signalName)
 
     {
         std::cerr << "Initializing " << signalName << " Monitor\n";
     }
 
-    virtual void hostOn()
-    {}
+    virtual void hostOn() {}
 
     bool isValid()
     {

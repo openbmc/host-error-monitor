@@ -39,8 +39,7 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
 
     AssertValue assertValue;
 
-    virtual void logEvent()
-    {}
+    virtual void logEvent() {}
 
     bool requestEvents()
     {
@@ -53,11 +52,11 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
 
         try
         {
-            line.request({"host-error-monitor",
-                          gpiod::line_request::EVENT_BOTH_EDGES,
-                          assertValue == AssertValue::highAssert
-                              ? 0
-                              : gpiod::line_request::FLAG_ACTIVE_LOW});
+            line.request(
+                {"host-error-monitor", gpiod::line_request::EVENT_BOTH_EDGES,
+                 assertValue == AssertValue::highAssert
+                     ? 0
+                     : gpiod::line_request::FLAG_ACTIVE_LOW});
         }
         catch (std::exception&)
         {
@@ -116,8 +115,7 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
         logEvent();
     }
 
-    virtual void deassertHandler()
-    {}
+    virtual void deassertHandler() {}
 
   private:
     void waitForEvent()
@@ -171,8 +169,7 @@ class BaseGPIOMonitor : public host_error_monitor::base_monitor::BaseMonitor
     BaseGPIOMonitor(boost::asio::io_context& io,
                     std::shared_ptr<sdbusplus::asio::connection> conn,
                     const std::string& signalName, AssertValue assertValue) :
-        BaseMonitor(io, conn, signalName),
-        event(io), assertValue(assertValue)
+        BaseMonitor(io, conn, signalName), event(io), assertValue(assertValue)
     {
         if (!requestEvents())
         {

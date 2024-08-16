@@ -40,8 +40,7 @@ class VRHotMonitor :
     VRHotMonitor(boost::asio::io_context& io,
                  std::shared_ptr<sdbusplus::asio::connection> conn,
                  const std::string& signalName, const std::string& vrName) :
-        BaseGPIOMonitor(io, conn, signalName, assertValue),
-        vrName(vrName)
+        BaseGPIOMonitor(io, conn, signalName, assertValue), vrName(vrName)
     {
         if (valid)
         {

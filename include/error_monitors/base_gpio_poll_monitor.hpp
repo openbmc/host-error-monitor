@@ -45,8 +45,7 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
     size_t pollingTimeMs;
     size_t timeoutMs;
 
-    virtual void logEvent()
-    {}
+    virtual void logEvent() {}
 
     bool requestEvents()
     {
@@ -59,11 +58,11 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
 
         try
         {
-            line.request({"host-error-monitor",
-                          gpiod::line_request::EVENT_BOTH_EDGES,
-                          assertValue == AssertValue::highAssert
-                              ? 0
-                              : gpiod::line_request::FLAG_ACTIVE_LOW});
+            line.request(
+                {"host-error-monitor", gpiod::line_request::EVENT_BOTH_EDGES,
+                 assertValue == AssertValue::highAssert
+                     ? 0
+                     : gpiod::line_request::FLAG_ACTIVE_LOW});
         }
         catch (std::exception&)
         {
@@ -110,8 +109,7 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
         logEvent();
     }
 
-    virtual void deassertHandler()
-    {}
+    virtual void deassertHandler() {}
 
   private:
     void flushEvents()
@@ -213,9 +211,8 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
                 // completion.
                 if (ec != boost::asio::error::operation_aborted)
                 {
-                    std::cerr << signalName
-                              << " polling async_wait failed: " << ec.message()
-                              << "\n";
+                    std::cerr << signalName << " polling async_wait failed: "
+                              << ec.message() << "\n";
                 }
                 return;
             }
@@ -228,9 +225,9 @@ class BaseGPIOPollMonitor : public host_error_monitor::base_monitor::BaseMonitor
                         std::shared_ptr<sdbusplus::asio::connection> conn,
                         const std::string& signalName, AssertValue assertValue,
                         size_t pollingTimeMs, size_t timeoutMs) :
-        BaseMonitor(io, conn, signalName),
-        pollingTimer(io), event(io), assertValue(assertValue),
-        pollingTimeMs(pollingTimeMs), timeoutMs(timeoutMs)
+        BaseMonitor(io, conn, signalName), pollingTimer(io), event(io),
+        assertValue(assertValue), pollingTimeMs(pollingTimeMs),
+        timeoutMs(timeoutMs)
     {
         if (!requestEvents())
         {

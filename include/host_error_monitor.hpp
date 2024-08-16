@@ -73,9 +73,8 @@ enum class RecoveryType
     warmReset,
 };
 
-static inline void
-    handleRecovery(RecoveryType recovery,
-                   std::shared_ptr<sdbusplus::asio::connection> conn)
+static inline void handleRecovery(
+    RecoveryType recovery, std::shared_ptr<sdbusplus::asio::connection> conn)
 {
     switch (recovery)
     {
@@ -176,9 +175,8 @@ static void printPECIError(const std::string& reg, const size_t addr,
         "xyz.openbmc_project.BeepCode", "Beep", uint8_t(beepPriority));
 }
 
-[[maybe_unused]] static inline void
-    checkErrPinCPUs([[maybe_unused]] const size_t errPin,
-                    std::bitset<MAX_CPUS>& errPinCPUs)
+[[maybe_unused]] static inline void checkErrPinCPUs(
+    [[maybe_unused]] const size_t errPin, std::bitset<MAX_CPUS>& errPinCPUs)
 {
     errPinCPUs.reset();
 #ifdef LIBPECI
