@@ -63,7 +63,7 @@ class ErrPinTimeoutMonitor :
     void errPinTimeoutLog(const int cpuNum)
     {
         std::string msg = "ERR" + std::to_string(errPin) + " Timeout on CPU " +
-                          std::to_string(cpuNum + 1);
+                          std::to_string(cpuNum);
 
         log_message(LOG_INFO, msg, "OpenBMC.0.1.CPUError", msg);
     }
