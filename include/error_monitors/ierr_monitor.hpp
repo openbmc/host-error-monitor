@@ -59,14 +59,14 @@ class IERRMonitor :
 
     void cpuIERRLog(const int cpuNum)
     {
-        std::string msg = "IERR on CPU " + std::to_string(cpuNum + 1);
+        std::string msg = "IERR on CPU " + std::to_string(cpuNum);
 
         log_message(LOG_INFO, msg, "OpenBMC.0.1.CPUError", msg);
     }
 
     void cpuIERRLog(const int cpuNum, const std::string& type)
     {
-        std::string msg = type + " IERR on CPU " + std::to_string(cpuNum + 1);
+        std::string msg = type + " IERR on CPU " + std::to_string(cpuNum);
 
         log_message(LOG_INFO, msg, "OpenBMC.0.1.CPUError", msg);
     }
