@@ -54,17 +54,17 @@ class ErrPinMonitor :
 
     void errPinLog()
     {
-        std::string msg = "ERR" + std::to_string(errPin);
+        std::string msg = "ERR" + std::to_string(errPin) + " asserted on one of the CPUs";
 
-        log_message(LOG_INFO, msg, "OpenBMC.0.1.CPUError", msg);
+        log_message(LOG_ERR, msg, "OpenBMC.0.1.CPUError", msg);
     }
 
     void errPinLog(const int cpuNum)
     {
-        std::string msg = "ERR" + std::to_string(errPin) + " on CPU " +
-                          std::to_string(cpuNum);
+        std::string msg = "ERR" + std::to_string(errPin) + " asserted on CPU " +
+                          std::to_string(cpuNum + 1);
 
-        log_message(LOG_INFO, msg, "OpenBMC.0.1.CPUError", msg);
+        log_message(LOG_ERR, msg, "OpenBMC.0.1.CPUError", msg);
     }
 
   public:
