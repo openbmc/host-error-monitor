@@ -24,10 +24,16 @@ class MCERRMonitor :
     public host_error_monitor::base_gpio_monitor::BaseGPIOMonitor
 {
     const size_t cpuNum;
+    const bool cpuNumValid;
 
     void logEvent() override
     {
-        std::string msg = "MCERR on CPU " + std::to_string(cpuNum);
+        std::string msg;
+        if (cpuNumValid) {
+            msg = "Machine Check Error on CPU " + std::to_string(cpuNum);
+        } else {
+            msg = "Machine Check Error";
+        }
 
         log_message(LOG_INFO, msg, "OpenBMC.0.1.CPUError", msg);
     }
@@ -37,9 +43,22 @@ class MCERRMonitor :
         boost::asio::io_context& io,
         std::shared_ptr<sdbusplus::asio::connection> conn,
         const std::string& signalName,
+        const host_error_monitor::base_gpio_monitor::AssertValue assertValue) :
+        BaseGPIOMonitor(io, conn, signalName, assertValue), cpuNum(0), cpuNumValid(false)
+    {
+        if (valid)
+        {
+            startMonitoring();
+        }
+    }
+
+    MCERRMonitor(
+        boost::asio::io_context& io,
+        std::shared_ptr<sdbusplus::asio::connection> conn,
+        const std::string& signalName,
         const host_error_monitor::base_gpio_monitor::AssertValue assertValue,
         const size_t cpuNum) :
-        BaseGPIOMonitor(io, conn, signalName, assertValue), cpuNum(cpuNum)
+        BaseGPIOMonitor(io, conn, signalName, assertValue), cpuNum(cpuNum), cpuNumValid(true)
     {
         if (valid)
         {
