@@ -12,15 +12,15 @@ project(
   ],
 )
 
-if (get_option('libpeci').enabled())
+if (get_option('libpeci').allowed())
   add_project_arguments('-DLIBPECI', language: 'cpp')
 endif
 
-if (get_option('crashdump').enabled())
+if (get_option('crashdump').allowed())
   add_project_arguments('-DCRASHDUMP', language: 'cpp')
 endif
 
-if (get_option('send-to-logger').enabled())
+if (get_option('send-to-logger').allowed())
   add_project_arguments('-DSEND_TO_LOGGING_SERVICE', language: 'cpp')
 endif
 
@@ -60,7 +60,7 @@ deps = [
   phosphor_dbus_interfaces,
 ]
 
-if (get_option('libpeci').enabled())
+if (get_option('libpeci').allowed())
   peci = dependency('libpeci')
   deps += [
     peci,
