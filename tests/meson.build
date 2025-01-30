@@ -13,7 +13,7 @@ if not gtest_dep.found() or not gmock_dep.found()
         gmock_dep = gtest_proj.dependency('gmock')
     else
         assert(
-            not get_option('tests').enabled(),
+            not get_option('tests').allowed(),
             'Googletest is required if tests are enabled',
         )
     endif
@@ -21,7 +21,7 @@ endif
 
 unit_tests = []
 
-if get_option('tests').enabled()
+if get_option('tests').allowed()
     # generate the test executable
     foreach unit_test : unit_tests
         test(
