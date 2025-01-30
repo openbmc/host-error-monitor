@@ -21,7 +21,7 @@ endif
 
 unit_tests = []
 
-if get_option('tests').enabled()
+if get_option('tests').allowed()
     # generate the test executable
     foreach unit_test : unit_tests
         test(
