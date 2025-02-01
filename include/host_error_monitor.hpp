@@ -31,8 +31,8 @@ using Association = std::tuple<std::string, std::string, std::string>;
 
 bool hostIsOff();
 
-static inline void
-    startPowerCycle(std::shared_ptr<sdbusplus::asio::connection> conn)
+static inline void startPowerCycle(
+    std::shared_ptr<sdbusplus::asio::connection> conn)
 {
     conn->async_method_call(
         [](boost::system::error_code ec) {
@@ -49,8 +49,8 @@ static inline void
             "xyz.openbmc_project.State.Chassis.Transition.PowerCycle"});
 }
 
-static inline void
-    startWarmReset(std::shared_ptr<sdbusplus::asio::connection> conn)
+static inline void startWarmReset(
+    std::shared_ptr<sdbusplus::asio::connection> conn)
 {
     conn->async_method_call(
         [](boost::system::error_code ec) {
@@ -157,9 +157,9 @@ static void printPECIError(const std::string& reg, const size_t addr,
 }
 #endif
 
-[[maybe_unused]] static inline void
-    beep(std::shared_ptr<sdbusplus::asio::connection> conn,
-         const uint8_t& beepPriority)
+[[maybe_unused]] static inline void beep(
+    std::shared_ptr<sdbusplus::asio::connection> conn,
+    const uint8_t& beepPriority)
 {
     conn->async_method_call(
         [](boost::system::error_code ec) {
