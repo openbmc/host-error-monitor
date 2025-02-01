@@ -32,11 +32,7 @@ if get_option('tests').allowed()
                 '../src/host_error_monitor.cpp',
                 cpp_args: '-DUNIT_TEST',
                 include_directories: incs,
-                dependencies: deps
-                + [
-                    gtest_dep,
-                    gmock_dep,
-                ],
+                dependencies: deps + [gtest_dep, gmock_dep],
             ),
         )
     endforeach
