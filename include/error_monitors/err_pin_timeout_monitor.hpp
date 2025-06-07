@@ -37,7 +37,7 @@ class ErrPinTimeoutMonitor :
     const static constexpr size_t errPinPollingTimeMs = 1000;
     const static constexpr size_t errPinTimeoutMs = 90000;
 
-    void logEvent()
+    void logEvent() override
     {
         if (errPinCPUs.none())
         {

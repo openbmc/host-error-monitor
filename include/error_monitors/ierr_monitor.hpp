@@ -44,7 +44,7 @@ class IERRMonitor :
     static const constexpr char* callbackMgrPath =
         "/xyz/openbmc_project/CallbackManager";
 
-    void logEvent()
+    void logEvent() override
     {
         if (!checkIERRCPUs())
         {
