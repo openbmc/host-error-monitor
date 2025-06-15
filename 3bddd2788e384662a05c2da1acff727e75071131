@@ -16,6 +16,24 @@
       "message": "Please use config-clang-tidy",
       "revId": "3bddd2788e384662a05c2da1acff727e75071131",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ed0400b_0065bb84",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-06-15T05:58:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57d122ef_cf29fee0",
+      "revId": "3bddd2788e384662a05c2da1acff727e75071131",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
