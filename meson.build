@@ -28,7 +28,9 @@ sdbusplus = dependency('sdbusplus')
 gpiodcxx = dependency('libgpiodcxx', default_options: ['bindings=cxx'])
 
 systemd = dependency('systemd', required: true)
-systemd_system_unit_dir = systemd.get_variable(pkgconfig: 'systemdsystemunitdir')
+systemd_system_unit_dir = systemd.get_variable(
+    pkgconfig: 'systemd_system_unit_dir',
+)
 
 boost = dependency(
     'boost',
