@@ -60,7 +60,7 @@ class Err2Monitor :
                         recovery = RecoveryType::warmReset;
                     }
                 }
-                startCrashdumpAndRecovery(conn, recovery, "ERR2 Timeout");
+                startCrashdumpAndRecovery(conn, recovery, "ERR2_Timeout");
             },
             "xyz.openbmc_project.Settings",
             "/xyz/openbmc_project/control/processor_error_config",
